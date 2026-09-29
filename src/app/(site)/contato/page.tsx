@@ -1,7 +1,6 @@
-"use client";
-
-import React from "react";
-import { MapPin, Phone, Mail, Clock, ExternalLink, Send } from "lucide-react";
+import Link from "next/link";
+import { MapPin, Phone, Mail, Clock, ExternalLink } from "lucide-react";
+import { MessageForm } from "@/components/content/MessageForm";
 import { INSTITUTION_INFO } from "@/data/institution";
 import { PageHero } from "@/components/layout/PageHero";
 
@@ -28,10 +27,6 @@ const contactItems = [
     lines: [INSTITUTION_INFO.contacts.hours],
   },
 ];
-
-const inputClass =
-  "w-full rounded-xl border border-slate-200 bg-[var(--color-bg)] px-4 py-3 text-sm text-slate-900 focus:border-[var(--color-brand-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-blue)]/40";
-const labelClass = "text-xs font-bold uppercase tracking-wide text-slate-700";
 
 export default function ContatoPage() {
   return (
@@ -101,14 +96,12 @@ export default function ContatoPage() {
                   Envie elogios, reclamações, denúncias ou solicitações da LAI, com sigilo garantido.
                 </p>
               </div>
-              <a
-                href={INSTITUTION_INFO.externalLinks.ouvidoriaForm}
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/ouvidoria"
                 className="shrink-0 rounded-xl bg-[var(--color-brand-blue)] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[var(--color-brand-navy)]"
               >
                 Abrir Ouvidoria
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -122,65 +115,7 @@ export default function ContatoPage() {
                 </p>
               </div>
 
-              <form
-                className="space-y-4"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  alert("Mensagem recebida com sucesso! Nossa equipe entrará em contato.");
-                }}
-              >
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className={labelClass}>Nome completo</label>
-                    <input type="text" required placeholder="Seu nome" className={inputClass} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className={labelClass}>CPF ou matrícula</label>
-                    <input type="text" required placeholder="000.000.000-00" className={inputClass} />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <label className={labelClass}>Telefone / WhatsApp</label>
-                    <input type="tel" required placeholder="(13) 90000-0000" className={inputClass} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className={labelClass}>E-mail</label>
-                    <input type="email" required placeholder="seuemail@exemplo.com" className={inputClass} />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className={labelClass}>Assunto</label>
-                  <select className={inputClass}>
-                    <option>Dúvidas sobre holerite / pagamento</option>
-                    <option>Recadastramento / prova de vida</option>
-                    <option>Informe de rendimentos (IRPF)</option>
-                    <option>Simulação de aposentadoria</option>
-                    <option>Certidão de tempo de contribuição (CTC)</option>
-                    <option>Outros assuntos</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className={labelClass}>Mensagem</label>
-                  <textarea
-                    rows={4}
-                    required
-                    placeholder="Descreva sua dúvida ou solicitação..."
-                    className={inputClass}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-brand-blue)] py-4 text-base font-bold text-white transition-colors hover:bg-[var(--color-brand-navy)]"
-                >
-                  <Send className="h-4 w-4" aria-hidden />
-                  <span>Enviar mensagem</span>
-                </button>
-              </form>
+              <MessageForm kind="contato" />
             </div>
           </div>
         </div>

@@ -1,23 +1,30 @@
 import Link from "next/link";
-import { count } from "drizzle-orm";
-import { Newspaper, FolderOpen, FileText, Images, HelpCircle, Settings } from "lucide-react";
+import { count, eq } from "drizzle-orm";
+import { Newspaper, FolderOpen, FileText, Images, HelpCircle, Settings, Inbox } from "lucide-react";
 import { db, schema } from "@/db";
 import { getSession } from "@/lib/auth";
 
 export default async function Dashboard() {
   const session = await getSession();
-  const [[news], [docs], [pages], [sections]] = await Promise.all([
+  const [[news], [docs], [pages], [sections], [newMsgs]] = await Promise.all([
     db.select({ n: count() }).from(schema.news),
     db.select({ n: count() }).from(schema.documents),
     db.select({ n: count() }).from(schema.pages),
     db.select({ n: count() }).from(schema.docSections),
+    db.select({ n: count() }).from(schema.messages).where(eq(schema.messages.status, "nova")),
   ]);
 
   const cards = [
+    {
+      href: "/admin/mensagens",
+      label: "Mensagens e Ouvidoria",
+      desc: newMsgs.n ? `${newMsgs.n} nova(s) aguardando` : "Nenhuma mensagem nova",
+      icon: Inbox,
+    },
     { href: "/admin/noticias/novo", label: "Publicar notícia", desc: `${news.n} publicadas`, icon: Newspaper },
     { href: "/admin/documentos", label: "Documentos", desc: `${docs.n} arquivos em ${sections.n} seções`, icon: FolderOpen },
-    { href: "/admin/paginas", label: "Páginas", desc: `${pages.n} páginas de texto`, icon: FileText },
-    { href: "/admin/slides", label: "Banner da Home", desc: "Slides do topo do site", icon: Images },
+    { href: "/admin/paginas", label: "Páginas de texto", desc: `${pages.n} páginas (Aposentados, Pensionistas…)`, icon: FileText },
+    { href: "/admin/slides", label: "Banner da página inicial", desc: "Imagens e textos do topo do site", icon: Images },
     { href: "/admin/faq", label: "Perguntas frequentes", desc: "Dúvidas dos segurados", icon: HelpCircle },
     { href: "/admin/configuracoes", label: "Contatos e links", desc: "Telefone, endereço, horários", icon: Settings },
   ];

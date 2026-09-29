@@ -19,7 +19,6 @@ export const SETTING_KEYS = [
       { key: "link.portalSegurado", label: "Portal do Segurado / Informe de Rendimentos" },
       { key: "link.censoManual", label: "Manual do recadastramento" },
       { key: "link.transparencia", label: "Portal da Transparência" },
-      { key: "link.ouvidoriaForm", label: "Formulário da ouvidoria" },
       { key: "link.tce", label: "Tribunal de Contas (TCE-SP)" },
       { key: "link.prefeitura", label: "Prefeitura de Itanhaém" },
       { key: "link.camara", label: "Câmara Municipal" },

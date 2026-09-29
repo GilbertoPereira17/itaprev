@@ -119,6 +119,24 @@ export const documents = pgTable("documents", {
   createdAt: createdAt(),
 });
 
+/** Mensagens recebidas pelo site: fale conosco e ouvidoria (nunca são apagadas, só arquivadas) */
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  protocol: text("protocol").notNull().default(""),
+  kind: text("kind").notNull().default("contato"), // contato | ouvidoria
+  category: text("category").notNull().default(""), // assunto ou tipo de manifestação
+  name: text("name").notNull().default(""),
+  document: text("document").notNull().default(""), // CPF ou matrícula (opcional)
+  email: text("email").notNull().default(""),
+  phone: text("phone").notNull().default(""),
+  body: text("body").notNull(),
+  anonymous: boolean("anonymous").notNull().default(false),
+  status: text("status").notNull().default("nova"), // nova | em_andamento | respondida | arquivada
+  internalNote: text("internal_note").notNull().default(""),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
 export type User = typeof users.$inferSelect;
 export type Slide = typeof slides.$inferSelect;
 export type News = typeof news.$inferSelect;
@@ -127,3 +145,4 @@ export type Page = typeof pages.$inferSelect;
 export type DocSection = typeof docSections.$inferSelect;
 export type DocGroup = typeof docGroups.$inferSelect;
 export type DocumentRow = typeof documents.$inferSelect;
+export type Message = typeof messages.$inferSelect;

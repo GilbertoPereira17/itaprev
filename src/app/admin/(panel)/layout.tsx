@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { LogOut } from "lucide-react";
+import { count, eq } from "drizzle-orm";
+import { db, schema } from "@/db";
 import { requireUser } from "@/lib/auth";
 import { AdminNav } from "@/components/admin/AdminNav";
 import { logoutAction } from "../login/actions";
@@ -9,6 +11,10 @@ export const metadata = { title: "Painel", robots: { index: false, follow: false
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
+  const [{ n: newMessages }] = await db
+    .select({ n: count() })
+    .from(schema.messages)
+    .where(eq(schema.messages.status, "nova"));
 
   return (
     <div className="flex min-h-screen w-full bg-slate-100">
@@ -16,7 +22,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         <div className="relative mb-8 hidden h-10 w-44 lg:block">
           <Image src="/images/logo-branco.png" alt="Itanhaém Prev" fill className="object-contain object-left" />
         </div>
-        <AdminNav role={user.role} />
+        <AdminNav role={user.role} newMessages={newMessages} />
         <div className="mt-auto hidden border-t border-white/10 pt-4 lg:block">
           <p className="truncate text-sm font-semibold text-white">{user.name}</p>
           <p className="text-xs text-slate-400">{user.role === "admin" ? "Administrador" : "Editor"}</p>

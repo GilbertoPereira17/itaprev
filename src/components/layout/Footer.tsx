@@ -13,6 +13,7 @@ const navLinks = [
   { label: "Transparência", href: "/transparencia" },
   { label: "Notícias", href: "/noticias" },
   { label: "Contato", href: "/contato" },
+  { label: "Ouvidoria", href: "/ouvidoria" },
 ];
 
 export function Footer({ settings = {} }: { settings?: SiteSettings }) {
@@ -23,7 +24,6 @@ export function Footer({ settings = {} }: { settings?: SiteSettings }) {
     { label: "Holerite (Servidor Online)", href: get("link.holerite", L.holeriteSystem) },
     { label: "Informe de rendimentos", href: get("link.portalSegurado", L.protecWeb) },
     { label: "Recadastramento", href: get("link.censoManual", L.censoManual) },
-    { label: "Ouvidoria", href: get("link.ouvidoriaForm", L.ouvidoriaForm) },
     { label: "Portal da Transparência", href: get("link.transparencia", L.transparencyPortal) },
   ];
   const gov = [

@@ -115,8 +115,8 @@ export function ChatWidget() {
       reply: "A Ouvidoria recebe elogios, sugestões, reclamações e denúncias com sigilo garantido. Registre sua manifestação pelo canal oficial.",
       action: {
         label: "Abrir a Ouvidoria",
-        url: INSTITUTION_INFO.externalLinks.ouvidoriaForm,
-        isExternal: true,
+        url: "/ouvidoria",
+        isExternal: false,
       },
     },
   ];
