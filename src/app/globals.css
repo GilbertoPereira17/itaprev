@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Marca (Logo) */
+  --color-brand-blue: #005bac;
+  --color-brand-blue-hover: #00488a;
+  --color-brand-cyan: #009ee2;
+  --color-brand-light-cyan: #54c0eb;
+  --color-brand-navy: #0b1e36;
+  --color-brand-navy-dark: #071526;
+
+  /* Selo Pró-Gestão */
+  --color-gold: #c59b27;
+  --color-gold-hover: #a68019;
+
+  /* Superfícies e texto (tema claro) */
+  --color-bg: #f3f5f8;
+  --color-surface: #ffffff;
+  --color-cream: #f7f4ee;
+  --color-surface-soft: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+
+  --font-scale: 1;
+}
+
+html {
+  font-size: calc(16px * var(--font-scale));
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Melhor legibilidade para idosos: parágrafos e listas com corpo generoso */
+p {
+  text-wrap: pretty;
+}
+
+h1, h2, h3, h4 {
+  text-wrap: balance;
+}
+
+/* =========================================================
+   MODO ALTO CONTRASTE (eMAG) — tema escuro limpo, sem "buga tudo".
+   Em vez de forçar amarelo em cada elemento, sobrescrevemos os
+   resultados das utilities do Tailwind mais usadas no site.
+   ========================================================= */
+body.high-contrast {
+  --color-bg: #000000;
+  --color-surface: #0a0f16;
+  --color-surface-soft: #12181f;
+  --color-border: #3a4656;
+  --color-text: #ffffff;
+  --color-text-muted: #d5deeb;
+  --color-brand-blue: #4db6ff;
+  --color-brand-blue-hover: #7cc9ff;
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+/* Superfícies claras -> superfícies escuras */
+body.high-contrast .bg-white,
+body.high-contrast .bg-slate-50,
+body.high-contrast .bg-slate-100,
+body.high-contrast .bg-slate-50\/70,
+body.high-contrast .bg-slate-50\/50 {
+  background-color: var(--color-surface) !important;
+}
+
+/* Textos escuros -> claros */
+body.high-contrast .text-slate-900,
+body.high-contrast .text-slate-800,
+body.high-contrast .text-slate-700 {
+  color: #ffffff !important;
+}
+body.high-contrast .text-slate-600,
+body.high-contrast .text-slate-500,
+body.high-contrast .text-slate-400 {
+  color: var(--color-text-muted) !important;
+}
+
+/* Bordas suaves -> bordas visíveis */
+body.high-contrast [class*="border-slate-1"],
+body.high-contrast [class*="border-slate-2"] {
+  border-color: var(--color-border) !important;
+}
+
+/* Azul da marca (texto e fundo) com contraste reforçado */
+body.high-contrast .text-\[\#005BAC\],
+body.high-contrast .text-\[\#00488A\] {
+  color: var(--color-brand-blue) !important;
+}
+body.high-contrast .bg-\[\#005BAC\] {
+  background-color: #003e75 !important;
+}
+
+/* =========================================================
+   FOCO ACESSÍVEL (WCAG 2.4.7) — anel visível em todo elemento focável
+   ========================================================= */
+:focus-visible {
+  outline: 3px solid var(--color-brand-cyan);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+body.high-contrast :focus-visible {
+  outline-color: #ffd000;
+}
+
+/* Animação de entrada ao rolar (scroll-driven, sem JS).
+   Só ativa onde há suporte — navegadores antigos mostram o conteúdo normal. */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: none; }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      opacity: 0;
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 38%;
+    }
+  }
+}
+
+/* Entrada do Hero no carregamento */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-enter {
+    animation: reveal-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+/* Balão flutuante da Ita (lançador do chatbot) */
+@keyframes ita-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ita-float { animation: ita-float 3s ease-in-out infinite; }
+}
+
+/* Splash screen: logo entra suave, barra dourada preenche */
+@keyframes splash-logo-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes splash-bar-fill {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+.splash-logo { animation: splash-logo-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.splash-bar { animation: splash-bar-fill 1.5s cubic-bezier(0.65, 0, 0.35, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .splash-logo, .splash-bar { animation: none; }
+}
+
+/* Superfície creme quente para dar calor e ritmo entre seções */
+.bg-cream {
+  background-color: var(--color-cream);
+}
+
+/* Textura de pontos discretíssima (profundidade sem poluir) */
+.pattern-dots {
+  background-image: radial-gradient(rgba(11, 30, 54, 0.05) 1px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+body.high-contrast .pattern-dots {
+  background-image: none;
+}
+
+/* Modo escala de cinza (acessibilidade visual).
+   Aplicado no <html> (não no <body>): um ancestral com `filter` vira o
+   containing block dos elementos position:fixed. No <html> (tamanho da
+   viewport) os botões/painéis fixos continuam funcionando corretamente. */
+html.grayscale {
+  filter: grayscale(1);
+}
+
+/* Skip link (pular para o conteúdo) */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  background: var(--color-brand-blue);
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  z-index: 9999;
+  font-weight: 700;
+  border-radius: 0 0 0.5rem 0.5rem;
+  transition: top 0.2s ease-in-out;
+}
+.skip-to-content:focus {
+  top: 0;
+}
+
+/* =========================================================
+   CONTEÚDO EDITÁVEL (páginas e notícias do painel)
+   Tipografia generosa para leitura confortável (público idoso)
+   ========================================================= */
+.prose-itaprev { color: var(--color-text); font-size: 1.0625rem; line-height: 1.8; }
+.prose-itaprev > * + * { margin-top: 1em; }
+.prose-itaprev h2 { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-top: 1.75em; line-height: 1.3; }
+.prose-itaprev h3 { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-top: 1.5em; }
+.prose-itaprev h4 { font-size: 1.1rem; font-weight: 700; margin-top: 1.25em; }
+.prose-itaprev a { color: var(--color-brand-blue); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.prose-itaprev ul { list-style: disc; padding-left: 1.5em; }
+.prose-itaprev ol { list-style: decimal; padding-left: 1.5em; }
+.prose-itaprev li + li { margin-top: 0.4em; }
+.prose-itaprev blockquote { border-left: 4px solid var(--color-gold); padding-left: 1em; color: var(--color-text-muted); font-style: italic; }
+.prose-itaprev img { border-radius: 1rem; max-width: 100%; height: auto; }
+.prose-itaprev table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.prose-itaprev th, .prose-itaprev td { border: 1px solid var(--color-border); padding: 0.5em 0.75em; text-align: left; }
+.prose-itaprev hr { border-color: var(--color-border); }
+body.high-contrast .prose-itaprev h2, body.high-contrast .prose-itaprev h3 { color: #fff; }

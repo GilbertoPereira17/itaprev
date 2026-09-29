@@ -1,0 +1,31 @@
+# Dependências
+/node_modules
+
+# Build do Next.js
+/.next
+/out
+
+# Ambiente / segredos (NUNCA commitar)
+.env
+.env*.local
+
+# Logs e sistema
+npm-debug.log*
+*.log
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Configurações locais de editor
+.antigravity
+
+# Banco local (PGlite) e arquivos enviados pelo painel
+/.data
+/uploads
+/backups
+*.tsbuildinfo
+proposta*.pdf
