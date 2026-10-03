@@ -3,10 +3,11 @@
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUser } from "@/lib/auth";
+import { audit } from "@/lib/audit";
 import { bool, done, fail, int, str } from "@/lib/admin";
 
 export async function saveFaq(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const id = int(fd, "id");
   const question = str(fd, "question");
   const answer = str(fd, "answer");
@@ -14,11 +15,16 @@ export async function saveFaq(fd: FormData) {
   const values = { question, answer, sortOrder: int(fd, "sortOrder"), active: bool(fd, "active") };
   if (id) await db.update(schema.faqs).set(values).where(eq(schema.faqs.id, id));
   else await db.insert(schema.faqs).values(values);
+  await audit(me, id ? "Editou pergunta frequente" : "Adicionou pergunta frequente", question);
   done("/admin/faq", id ? "Pergunta salva." : "Pergunta adicionada.");
 }
 
 export async function deleteFaq(fd: FormData) {
-  await requireUser();
-  await db.delete(schema.faqs).where(eq(schema.faqs.id, int(fd, "id")));
+  const me = await requireUser();
+  const [old] = await db.select().from(schema.faqs).where(eq(schema.faqs.id, int(fd, "id")));
+  if (old) {
+    await db.delete(schema.faqs).where(eq(schema.faqs.id, old.id));
+    await audit(me, "Excluiu pergunta frequente", old.question);
+  }
   done("/admin/faq", "Pergunta excluída.");
 }

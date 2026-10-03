@@ -51,8 +51,12 @@ Legenda: ✅ pronto e validado · 🟡 parcial · ⏳ pendente
 - ✅ Gestão de **notícias, páginas, banner, documentos, FAQ, configurações (contatos/links)
   e usuários**; troca da própria senha. Validado de ponta a ponta (criar → editar → publicar).
 - ✅ Papéis `admin` / `editor`.
-- ⏳ 2FA no painel, política de senha (complexidade/expiração), trilha de auditoria completa,
-  RBAC com granularidade por módulo, triagem das solicitações da Etapa 3.
+- ✅ **Mensagens e Ouvidoria**: fale conosco e ouvidoria do site (com protocolo e opção anônima)
+  chegam no painel, com status e anotação interna.
+- ✅ **Verificação em duas etapas (2FA)** por aplicativo autenticador, com redefinição pelo admin.
+- ✅ **Política de senha**: complexidade, validade de 180 dias, senha provisória com troca obrigatória.
+- ✅ **Registro de atividades (auditoria)** de logins e de todas as alterações do painel.
+- ⏳ RBAC com granularidade por módulo; triagem das solicitações da Etapa 3.
 
 ### Etapa 5 — Chatbot
 - ✅ Assistente **"Ita"** no site (widget) → fluxo n8n **"ITAPREV - Chatbot Segurado"** →

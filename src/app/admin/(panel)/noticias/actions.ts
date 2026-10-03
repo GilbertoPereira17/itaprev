@@ -3,13 +3,14 @@
 import { and, eq, ne } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUser } from "@/lib/auth";
+import { audit } from "@/lib/audit";
 import { bool, done, fail, file, int, str } from "@/lib/admin";
 import { slugify } from "@/lib/format";
 import { cleanHtml } from "@/lib/sanitize";
 import { deleteUpload, saveUpload, UploadError } from "@/lib/storage";
 
 export async function saveNews(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const id = int(fd, "id");
   const back = id ? `/admin/noticias/${id}` : "/admin/noticias/novo";
 
@@ -54,6 +55,7 @@ export async function saveNews(fd: FormData) {
       .update(schema.news)
       .set({ ...values, ...(coverPath ? { coverPath } : removeCover ? { coverPath: "" } : {}) })
       .where(eq(schema.news.id, id));
+    await audit(me, "Editou notícia", title);
     done(`/admin/noticias/${id}`, "Notícia salva.");
   }
 
@@ -61,16 +63,18 @@ export async function saveNews(fd: FormData) {
     .insert(schema.news)
     .values({ ...values, coverPath: coverPath ?? "" })
     .returning({ id: schema.news.id });
+  await audit(me, values.published ? "Publicou notícia" : "Criou notícia (não publicada)", title);
   done(`/admin/noticias/${row.id}`, "Notícia publicada.");
 }
 
 export async function deleteNews(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const id = int(fd, "id");
   const [old] = await db.select().from(schema.news).where(eq(schema.news.id, id));
   if (old) {
     await deleteUpload(old.coverPath);
     await db.delete(schema.news).where(eq(schema.news.id, id));
+    await audit(me, "Excluiu notícia", old.title);
   }
   done("/admin/noticias", "Notícia excluída.");
 }

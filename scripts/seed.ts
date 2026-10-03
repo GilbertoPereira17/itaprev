@@ -25,6 +25,7 @@ async function main() {
       email,
       passwordHash: await bcrypt.hash(password, 12),
       role: "admin",
+      mustChangePassword: true, // no primeiro acesso a pessoa define a própria senha
     });
     console.log(`✔ Admin criado: ${email}`);
     if (!process.env.ADMIN_PASSWORD) {

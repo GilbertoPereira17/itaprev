@@ -3,6 +3,7 @@
 import { and, eq, ne } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUser } from "@/lib/auth";
+import { audit } from "@/lib/audit";
 import { bool, done, fail, int, str } from "@/lib/admin";
 import { slugify } from "@/lib/format";
 import { cleanHtml } from "@/lib/sanitize";
@@ -11,7 +12,7 @@ import { cleanHtml } from "@/lib/sanitize";
 const RESERVED = ["admin", "noticias", "documentos", "transparencia", "institucional", "segurados", "conselhos", "contato", "uploads", "images"];
 
 export async function savePage(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const id = int(fd, "id");
   const back = id ? `/admin/paginas/${id}` : "/admin/paginas/nova";
   const title = str(fd, "title");
@@ -36,14 +37,20 @@ export async function savePage(fd: FormData) {
 
   if (id) {
     await db.update(schema.pages).set(values).where(eq(schema.pages.id, id));
+    await audit(me, "Editou página", `${title} (/${slug})`);
     done(back, "Página salva.");
   }
   const [row] = await db.insert(schema.pages).values(values).returning({ id: schema.pages.id });
+  await audit(me, "Criou página", `${title} (/${slug})`);
   done(`/admin/paginas/${row.id}`, "Página criada.");
 }
 
 export async function deletePage(fd: FormData) {
-  await requireUser();
-  await db.delete(schema.pages).where(eq(schema.pages.id, int(fd, "id")));
+  const me = await requireUser();
+  const [old] = await db.select().from(schema.pages).where(eq(schema.pages.id, int(fd, "id")));
+  if (old) {
+    await db.delete(schema.pages).where(eq(schema.pages.id, old.id));
+    await audit(me, "Excluiu página", `${old.title} (/${old.slug})`);
+  }
   done("/admin/paginas", "Página excluída.");
 }

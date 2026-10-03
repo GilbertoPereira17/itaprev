@@ -14,6 +14,11 @@ export const users = pgTable(
     role: text("role").notNull().default("editor"), // admin | editor
     active: boolean("active").notNull().default(true),
     createdAt: createdAt(),
+    // Segurança da conta
+    totpSecret: text("totp_secret").notNull().default(""), // segredo do 2FA (criptografado)
+    totpEnabled: boolean("totp_enabled").notNull().default(false),
+    passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }).notNull().defaultNow(),
+    mustChangePassword: boolean("must_change_password").notNull().default(false),
   },
   (t) => ({ emailIdx: uniqueIndex("users_email_idx").on(t.email) })
 );
@@ -137,6 +142,17 @@ export const messages = pgTable("messages", {
   updatedAt: updatedAt(),
 });
 
+/** Registro de auditoria: quem fez o quê no painel e quando (somente inclusão, nunca editado) */
+export const auditLog = pgTable("audit_log", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id"), // sem FK: o registro permanece mesmo se o usuário mudar
+  userName: text("user_name").notNull().default(""),
+  action: text("action").notNull(),
+  target: text("target").notNull().default(""),
+  ip: text("ip").notNull().default(""),
+  createdAt: createdAt(),
+});
+
 export type User = typeof users.$inferSelect;
 export type Slide = typeof slides.$inferSelect;
 export type News = typeof news.$inferSelect;
@@ -146,3 +162,4 @@ export type DocSection = typeof docSections.$inferSelect;
 export type DocGroup = typeof docGroups.$inferSelect;
 export type DocumentRow = typeof documents.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+export type AuditEntry = typeof auditLog.$inferSelect;

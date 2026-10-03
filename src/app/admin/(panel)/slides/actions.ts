@@ -3,11 +3,12 @@
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUser } from "@/lib/auth";
+import { audit } from "@/lib/audit";
 import { bool, done, fail, file, int, str } from "@/lib/admin";
 import { deleteUpload, saveUpload, UploadError } from "@/lib/storage";
 
 export async function saveSlide(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const id = int(fd, "id");
   const back = "/admin/slides";
   const title = str(fd, "title");
@@ -39,20 +40,23 @@ export async function saveSlide(fd: FormData) {
       if (old) await deleteUpload(old.imagePath);
     }
     await db.update(schema.slides).set({ ...values, ...(imagePath ? { imagePath } : {}) }).where(eq(schema.slides.id, id));
+    await audit(me, "Editou slide do banner", title);
     done(back, "Slide salvo.");
   }
   if (!imagePath) fail(back, "Envie uma imagem de fundo para o novo slide.");
   await db.insert(schema.slides).values({ ...values, imagePath });
+  await audit(me, "Criou slide do banner", title);
   done(back, "Slide criado.");
 }
 
 export async function deleteSlide(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const id = int(fd, "id");
   const [old] = await db.select().from(schema.slides).where(eq(schema.slides.id, id));
   if (old) {
     await deleteUpload(old.imagePath);
     await db.delete(schema.slides).where(eq(schema.slides.id, id));
+    await audit(me, "Excluiu slide do banner", old.title);
   }
   done("/admin/slides", "Slide excluído.");
 }

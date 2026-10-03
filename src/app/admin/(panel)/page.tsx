@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { count, eq } from "drizzle-orm";
-import { Newspaper, FolderOpen, FileText, Images, HelpCircle, Settings, Inbox } from "lucide-react";
+import { Newspaper, FolderOpen, FileText, Images, HelpCircle, Settings, Inbox, ShieldAlert } from "lucide-react";
 import { db, schema } from "@/db";
 import { getSession } from "@/lib/auth";
 
 export default async function Dashboard() {
   const session = await getSession();
+  const [me] = session
+    ? await db.select({ totpEnabled: schema.users.totpEnabled }).from(schema.users).where(eq(schema.users.id, session.uid))
+    : [];
   const [[news], [docs], [pages], [sections], [newMsgs]] = await Promise.all([
     db.select({ n: count() }).from(schema.news),
     db.select({ n: count() }).from(schema.documents),
@@ -33,6 +36,17 @@ export default async function Dashboard() {
     <>
       <h1 className="text-2xl font-extrabold text-slate-900">Olá, {session?.name?.split(" ")[0]}</h1>
       <p className="mb-8 mt-1 text-slate-500">O que você quer atualizar no site hoje?</p>
+      {me && !me.totpEnabled && (
+        <Link
+          href="/admin/conta"
+          className="mb-6 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 hover:border-amber-300"
+        >
+          <ShieldAlert className="h-6 w-6 shrink-0 text-amber-500" aria-hidden />
+          <span>
+            <strong>Proteja sua conta:</strong> ative a verificação em duas etapas (código no celular). Leva 1 minuto.
+          </span>
+        </Link>
+      )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
           <Link

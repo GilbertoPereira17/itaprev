@@ -106,6 +106,16 @@ atrás de `requireUser`/`requireAdmin`.
 - Autenticação própria: **bcrypt** (senha) + **JWT em cookie** (`jose`), sem dependência paga.
 - `middleware.ts` bloqueia `/admin/*` sem sessão válida (redireciona ao login).
 - Cookie `secure` em produção (HTTPS); `INSECURE_COOKIE=1` só para teste local sem TLS.
+- **Verificação em duas etapas (TOTP, RFC 6238)** opcional por usuário (`src/lib/totp.ts`), compatível
+  com Google/Microsoft Authenticator. O segredo fica criptografado (AES-256-GCM, chave derivada do
+  `SESSION_SECRET`). Login com 2FA: senha → cookie temporário de 5 min → código → sessão.
+- **Política de senha** (`src/lib/password.ts`): 10+ caracteres com letras e números, validade de
+  180 dias. Senhas definidas por administrador são provisórias (troca obrigatória no 1º acesso).
+- **Bloqueio por tentativas**: 5 erros de senha ou de código → 10 minutos de bloqueio.
+- **Auditoria** (`src/lib/audit.ts`, tabela `audit_log`): todo login, saída, falha de acesso e
+  alteração de conteúdo/usuários fica registrado (quem, o quê, item, IP, quando). Consulta em
+  `/admin/auditoria` (só administradores). Não há tela para editar ou apagar registros.
+- **Recuperação de acesso** pelo servidor: `npm run admin:recuperar -- email`.
 - Todo HTML de conteúdo passa por `cleanHtml`; todo upload passa por validação de tipo real.
 
 ## 5. Integração com sistemas de terceiros (consulta via API)

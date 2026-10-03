@@ -8,6 +8,7 @@ export const metadata = { title: "Entrar no painel", robots: { index: false } };
 const ERRORS: Record<string, string> = {
   credenciais: "E-mail ou senha incorretos.",
   bloqueado: "Muitas tentativas. Aguarde 10 minutos e tente novamente.",
+  expirou: "O tempo para digitar o código acabou. Entre novamente.",
 };
 
 export default function LoginPage({ searchParams }: { searchParams: { erro?: string; next?: string } }) {

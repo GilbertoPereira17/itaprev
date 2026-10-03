@@ -3,53 +3,67 @@
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { requireAdmin, requireUser } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
+import { audit } from "@/lib/audit";
 import { done, fail, int, str } from "@/lib/admin";
+import { passwordProblem } from "@/lib/password";
 
-const MIN_PASSWORD = 10;
+const BACK = "/admin/usuarios";
+
+async function findUser(id: number) {
+  const [u] = await db.select().from(schema.users).where(eq(schema.users.id, id));
+  if (!u) fail(BACK, "Usuário não encontrado.");
+  return u;
+}
 
 export async function createUser(fd: FormData) {
-  await requireAdmin();
+  const me = await requireAdmin();
   const name = str(fd, "name");
   const email = str(fd, "email").toLowerCase();
   const password = str(fd, "password");
   const role = str(fd, "role") === "admin" ? "admin" : "editor";
-  if (!name || !email) fail("/admin/usuarios", "Preencha nome e e-mail.");
-  if (password.length < MIN_PASSWORD) fail("/admin/usuarios", `A senha precisa ter ao menos ${MIN_PASSWORD} caracteres.`);
+  if (!name || !email) fail(BACK, "Preencha nome e e-mail.");
+  const problem = passwordProblem(password, email);
+  if (problem) fail(BACK, problem);
   const exists = await db.select({ id: schema.users.id }).from(schema.users).where(eq(schema.users.email, email));
-  if (exists.length) fail("/admin/usuarios", "Já existe um usuário com esse e-mail.");
-  await db.insert(schema.users).values({ name, email, role, passwordHash: await bcrypt.hash(password, 12) });
-  done("/admin/usuarios", `Usuário ${name} criado.`);
+  if (exists.length) fail(BACK, "Já existe um usuário com esse e-mail.");
+  // Senha inicial é provisória: a pessoa define a própria no primeiro acesso
+  await db
+    .insert(schema.users)
+    .values({ name, email, role, passwordHash: await bcrypt.hash(password, 12), mustChangePassword: true });
+  await audit(me, "Criou usuário", `${name} <${email}> · ${role === "admin" ? "Administrador" : "Editor"}`);
+  done(BACK, `Usuário ${name} criado. No primeiro acesso, será pedida uma nova senha.`);
 }
 
 export async function toggleUser(fd: FormData) {
   const me = await requireAdmin();
   const id = int(fd, "id");
-  if (id === me.uid) fail("/admin/usuarios", "Você não pode desativar a si mesmo.");
-  const [u] = await db.select().from(schema.users).where(eq(schema.users.id, id));
-  if (u) await db.update(schema.users).set({ active: !u.active }).where(eq(schema.users.id, id));
-  done("/admin/usuarios", "Usuário atualizado.");
+  if (id === me.uid) fail(BACK, "Você não pode desativar a si mesmo.");
+  const u = await findUser(id);
+  await db.update(schema.users).set({ active: !u.active }).where(eq(schema.users.id, id));
+  await audit(me, u.active ? "Desativou usuário" : "Reativou usuário", `${u.name} <${u.email}>`);
+  done(BACK, "Usuário atualizado.");
 }
 
 export async function resetPassword(fd: FormData) {
-  await requireAdmin();
+  const me = await requireAdmin();
+  const u = await findUser(int(fd, "id"));
   const password = str(fd, "password");
-  if (password.length < MIN_PASSWORD) fail("/admin/usuarios", `A senha precisa ter ao menos ${MIN_PASSWORD} caracteres.`);
+  const problem = passwordProblem(password, u.email);
+  if (problem) fail(BACK, problem);
   await db
     .update(schema.users)
-    .set({ passwordHash: await bcrypt.hash(password, 12) })
-    .where(eq(schema.users.id, int(fd, "id")));
-  done("/admin/usuarios", "Senha redefinida.");
+    .set({ passwordHash: await bcrypt.hash(password, 12), mustChangePassword: true, passwordChangedAt: new Date() })
+    .where(eq(schema.users.id, u.id));
+  await audit(me, "Redefiniu a senha de usuário", `${u.name} <${u.email}>`);
+  done(BACK, `Senha provisória definida para ${u.name}. No próximo acesso, será pedida uma nova.`);
 }
 
-export async function changeOwnPassword(fd: FormData) {
-  const me = await requireUser();
-  const current = str(fd, "current");
-  const next = str(fd, "next");
-  if (next.length < MIN_PASSWORD) fail("/admin/conta", `A nova senha precisa ter ao menos ${MIN_PASSWORD} caracteres.`);
-  if (next !== str(fd, "confirm")) fail("/admin/conta", "A confirmação não confere com a nova senha.");
-  const [u] = await db.select().from(schema.users).where(eq(schema.users.id, me.uid));
-  if (!u || !(await bcrypt.compare(current, u.passwordHash))) fail("/admin/conta", "Senha atual incorreta.");
-  await db.update(schema.users).set({ passwordHash: await bcrypt.hash(next, 12) }).where(eq(schema.users.id, me.uid));
-  done("/admin/conta", "Senha alterada com sucesso.");
+/** Para quem perdeu o celular: desliga o 2FA; a pessoa reativa depois em Minha conta */
+export async function resetTwoFactor(fd: FormData) {
+  const me = await requireAdmin();
+  const u = await findUser(int(fd, "id"));
+  await db.update(schema.users).set({ totpEnabled: false, totpSecret: "" }).where(eq(schema.users.id, u.id));
+  await audit(me, "Redefiniu a verificação em duas etapas de usuário", `${u.name} <${u.email}>`);
+  done(BACK, `Verificação em duas etapas de ${u.name} desativada. Peça para reativar em Minha conta.`);
 }

@@ -15,6 +15,13 @@
       "when": 1790705750043,
       "tag": "0001_flaky_misty_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791059547739,
+      "tag": "0002_handy_jackpot",
+      "breakpoints": true
     }
   ]
 }

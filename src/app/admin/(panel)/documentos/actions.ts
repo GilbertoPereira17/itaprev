@@ -3,13 +3,14 @@
 import { and, eq, ne, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUser } from "@/lib/auth";
+import { audit } from "@/lib/audit";
 import { bool, done, fail, file, int, str } from "@/lib/admin";
 import { slugify } from "@/lib/format";
 import { deleteUpload, saveUpload, UploadError } from "@/lib/storage";
 
 // ---------- Seções ----------
 export async function saveSection(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const id = int(fd, "id");
   const back = id ? `/admin/documentos/${id}` : "/admin/documentos";
   const title = str(fd, "title");
@@ -34,15 +35,18 @@ export async function saveSection(fd: FormData) {
 
   if (id) {
     await db.update(schema.docSections).set(values).where(eq(schema.docSections.id, id));
+    await audit(me, "Editou seção de documentos", title);
     done(back, "Seção salva.");
   }
   const [row] = await db.insert(schema.docSections).values(values).returning({ id: schema.docSections.id });
+  await audit(me, "Criou seção de documentos", title);
   done(`/admin/documentos/${row.id}`, "Seção criada. Agora adicione os grupos e documentos.");
 }
 
 export async function deleteSection(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const id = int(fd, "id");
+  const [section] = await db.select().from(schema.docSections).where(eq(schema.docSections.id, id));
   const groups = await db.select({ id: schema.docGroups.id }).from(schema.docGroups).where(eq(schema.docGroups.sectionId, id));
   if (groups.length) {
     const docs = await db
@@ -52,12 +56,13 @@ export async function deleteSection(fd: FormData) {
     for (const d of docs) await deleteUpload(d.filePath);
   }
   await db.delete(schema.docSections).where(eq(schema.docSections.id, id)); // cascata apaga grupos/documentos
+  if (section) await audit(me, "Excluiu seção de documentos (com todos os arquivos)", section.title);
   done("/admin/documentos", "Seção excluída.");
 }
 
 // ---------- Grupos ----------
 export async function saveGroup(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const sectionId = int(fd, "sectionId");
   const id = int(fd, "id");
   const back = `/admin/documentos/${sectionId}`;
@@ -65,25 +70,29 @@ export async function saveGroup(fd: FormData) {
   if (!title) fail(back, "Informe o nome do grupo.");
   if (id) {
     await db.update(schema.docGroups).set({ title, sortOrder: int(fd, "sortOrder") }).where(eq(schema.docGroups.id, id));
+    await audit(me, "Editou grupo de documentos", title);
     done(back, "Grupo salvo.");
   }
   await db.insert(schema.docGroups).values({ sectionId, title, sortOrder: int(fd, "sortOrder") });
+  await audit(me, "Criou grupo de documentos", title);
   done(back, `Grupo "${title}" criado.`);
 }
 
 export async function deleteGroup(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const id = int(fd, "id");
   const sectionId = int(fd, "sectionId");
+  const [group] = await db.select().from(schema.docGroups).where(eq(schema.docGroups.id, id));
   const docs = await db.select({ filePath: schema.documents.filePath }).from(schema.documents).where(eq(schema.documents.groupId, id));
   for (const d of docs) await deleteUpload(d.filePath);
   await db.delete(schema.docGroups).where(eq(schema.docGroups.id, id));
+  if (group) await audit(me, "Excluiu grupo de documentos (com os arquivos)", group.title);
   done(`/admin/documentos/${sectionId}`, "Grupo excluído.");
 }
 
 // ---------- Documentos ----------
 export async function addDocuments(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const groupId = int(fd, "groupId");
   const sectionId = int(fd, "sectionId");
   const back = `/admin/documentos/${sectionId}`;
@@ -110,11 +119,12 @@ export async function addDocuments(fd: FormData) {
     if (e instanceof UploadError) fail(back, e.message);
     throw e;
   }
+  await audit(me, files.length === 1 ? "Adicionou documento" : `Adicionou ${files.length} documentos`, files.map((f) => f.name).join(", "));
   done(back, files.length === 1 ? "Documento adicionado." : `${files.length} documentos adicionados.`);
 }
 
 export async function updateDocument(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const id = int(fd, "id");
   const sectionId = int(fd, "sectionId");
   const back = `/admin/documentos/${sectionId}`;
@@ -135,17 +145,19 @@ export async function updateDocument(fd: FormData) {
     }
   }
   await db.update(schema.documents).set(patch).where(eq(schema.documents.id, id));
+  await audit(me, replacement ? "Substituiu arquivo de documento" : "Editou documento", title);
   done(back, "Documento atualizado.");
 }
 
 export async function deleteDocument(fd: FormData) {
-  await requireUser();
+  const me = await requireUser();
   const id = int(fd, "id");
   const sectionId = int(fd, "sectionId");
   const [old] = await db.select().from(schema.documents).where(eq(schema.documents.id, id));
   if (old) {
     await deleteUpload(old.filePath);
     await db.delete(schema.documents).where(eq(schema.documents.id, id));
+    await audit(me, "Excluiu documento", old.title);
   }
   done(`/admin/documentos/${sectionId}`, "Documento excluído.");
 }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
-  LayoutDashboard, Newspaper, FileText, FolderOpen, Images, HelpCircle, Settings, Users, KeyRound, Menu, X, ExternalLink, Inbox,
+  LayoutDashboard, Newspaper, FileText, FolderOpen, Images, HelpCircle, Settings, Users, KeyRound, Menu, X, ExternalLink, Inbox, History,
 } from "lucide-react";
 
 type Item = {
@@ -38,7 +38,8 @@ const groups: { title?: string; items: Item[] }[] = [
     items: [
       { href: "/admin/configuracoes", label: "Contatos e links", hint: "Telefones, endereço, horários", icon: Settings },
       { href: "/admin/usuarios", label: "Usuários", icon: Users, adminOnly: true },
-      { href: "/admin/conta", label: "Minha senha", icon: KeyRound },
+      { href: "/admin/auditoria", label: "Registro de atividades", hint: "Quem fez o quê no painel", icon: History, adminOnly: true },
+      { href: "/admin/conta", label: "Minha conta", hint: "Senha e verificação em duas etapas", icon: KeyRound },
     ],
   },
 ];

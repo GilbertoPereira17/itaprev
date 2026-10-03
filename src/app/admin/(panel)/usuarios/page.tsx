@@ -2,7 +2,8 @@ import { asc } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireAdmin } from "@/lib/auth";
 import { Card, Field, Flash, Input, PageHeader, Select, SubmitButton } from "@/components/admin/ui";
-import { createUser, resetPassword, toggleUser } from "./actions";
+import { PASSWORD_RULES } from "@/lib/password";
+import { createUser, resetPassword, resetTwoFactor, toggleUser } from "./actions";
 
 export default async function AdminUsers({ searchParams }: { searchParams: { ok?: string; erro?: string } }) {
   const me = await requireAdmin();
@@ -24,15 +25,25 @@ export default async function AdminUsers({ searchParams }: { searchParams: { ok?
                 <p className="text-xs text-slate-500">
                   {u.email} · {u.role === "admin" ? "Administrador" : "Editor"} {!u.active && "· desativado"}
                 </p>
+                <p className={`mt-0.5 text-xs font-semibold ${u.totpEnabled ? "text-emerald-700" : "text-amber-700"}`}>
+                  {u.totpEnabled ? "✓ Verificação em duas etapas ativa" : "Sem verificação em duas etapas"}
+                  {u.mustChangePassword && <span className="font-normal text-slate-500"> · aguardando troca da senha provisória</span>}
+                </p>
               </div>
               <details className="relative">
                 <summary className="cursor-pointer text-sm font-semibold text-[var(--color-brand-blue)]">Redefinir senha</summary>
                 <form action={resetPassword} className="absolute right-0 z-10 mt-2 flex w-72 gap-2 rounded-xl border bg-white p-3 shadow-lg">
                   <input type="hidden" name="id" value={u.id} />
-                  <Input name="password" type="text" minLength={10} placeholder="Nova senha (10+)" className="!py-2" />
+                  <Input name="password" type="text" minLength={10} placeholder="Senha provisória" className="!py-2" />
                   <SubmitButton className="!px-3 !py-2">OK</SubmitButton>
                 </form>
               </details>
+              {u.totpEnabled && u.id !== me.uid && (
+                <form action={resetTwoFactor}>
+                  <input type="hidden" name="id" value={u.id} />
+                  <SubmitButton variant="ghost" className="!px-3 !py-2">Redefinir 2FA</SubmitButton>
+                </form>
+              )}
               {u.id !== me.uid && (
                 <form action={toggleUser}>
                   <input type="hidden" name="id" value={u.id} />
@@ -49,7 +60,7 @@ export default async function AdminUsers({ searchParams }: { searchParams: { ok?
         <form action={createUser} className="grid gap-4 sm:grid-cols-2">
           <Field label="Nome"><Input name="name" required /></Field>
           <Field label="E-mail"><Input name="email" type="email" required /></Field>
-          <Field label="Senha inicial" hint="Mínimo de 10 caracteres. Peça para a pessoa trocar no primeiro acesso.">
+          <Field label="Senha provisória" hint={`${PASSWORD_RULES} No primeiro acesso, a pessoa define a própria senha.`}>
             <Input name="password" type="text" minLength={10} required />
           </Field>
           <Field label="Perfil">

@@ -144,7 +144,8 @@ sudo certbot --nginx -d www.itanhaemprev.sp.gov.br -d itanhaemprev.sp.gov.br   #
 ## 8. Acessar o painel
 
 `https://www.itanhaemprev.sp.gov.br/admin` → entre com `ADMIN_EMAIL` e a senha do passo 5.
-Troque a senha em **Minha senha** e crie os usuários da equipe em **Usuários**.
+No primeiro acesso o painel pede uma senha nova. Depois, em **Minha conta**, ative a
+**verificação em duas etapas** (código no celular) e crie os usuários da equipe em **Usuários**.
 
 ---
 
@@ -195,6 +196,22 @@ pg_restore --clean --if-exists --no-owner -d "postgres://itaprev:SENHA@localhost
 git reset --hard <versão anterior>   # o script mostra qual era
 npm ci --include=dev && npm run build && pm2 start itaprev
 ```
+
+---
+
+## Perdeu o acesso ao painel?
+
+Se um administrador esqueceu a senha ou perdeu o celular do 2FA (e não há outro administrador
+para redefinir pela tela **Usuários**), rode no servidor, na pasta do projeto:
+
+```bash
+npm run admin:recuperar -- email@itanhaemprev.sp.gov.br
+```
+
+Ele mostra uma senha provisória, desativa o 2FA da pessoa e registra a ação na auditoria.
+
+> **Não troque o `SESSION_SECRET`** depois que a equipe ativar o 2FA: os códigos deixam de
+> valer e cada pessoa precisa reconfigurar (use o comando acima se ninguém conseguir entrar).
 
 ---
 
