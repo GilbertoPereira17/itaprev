@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { CheckCircle2, Send } from "lucide-react";
 import { sendMessage, type MessageState } from "@/lib/message-actions";
 import { CONTACT_SUBJECTS, OMBUDSMAN_TYPES } from "@/lib/messages";
@@ -25,7 +25,7 @@ function SendButton() {
 }
 
 export function MessageForm({ kind }: { kind: "contato" | "ouvidoria" }) {
-  const [state, action] = useFormState<MessageState, FormData>(sendMessage, { ok: false });
+  const [state, action] = useActionState<MessageState, FormData>(sendMessage, { ok: false });
   const [anonymous, setAnonymous] = useState(false);
   const isOmbudsman = kind === "ouvidoria";
 

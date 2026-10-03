@@ -21,7 +21,8 @@ function FaqForm({ faq, nextOrder }: { faq?: Faq; nextOrder: number }) {
   );
 }
 
-export default async function AdminFaq({ searchParams }: { searchParams: { ok?: string; erro?: string } }) {
+export default async function AdminFaq(props: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
+  const searchParams = await props.searchParams;
   const faqs = await db.select().from(schema.faqs).orderBy(asc(schema.faqs.sortOrder), asc(schema.faqs.id));
   return (
     <>

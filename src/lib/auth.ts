@@ -7,7 +7,7 @@ import { SESSION_COOKIE, verifySession, type SessionPayload } from "./session";
 
 /** Sessão atual (ou null) — para Server Components e Server Actions */
 export async function getSession(): Promise<SessionPayload | null> {
-  return verifySession(cookies().get(SESSION_COOKIE)?.value);
+  return verifySession((await cookies()).get(SESSION_COOKIE)?.value);
 }
 
 /** Exige usuário logado; senão manda para o login */

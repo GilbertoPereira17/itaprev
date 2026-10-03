@@ -5,9 +5,9 @@ const nextConfig = {
     // Imagens enviadas pelo painel são servidas por /uploads (rota própria)
     unoptimized: true,
   },
+  // Drivers de banco rodam só no servidor, sem passar pelo bundler
+  serverExternalPackages: ["@electric-sql/pglite", "pg"],
   experimental: {
-    // Drivers de banco rodam só no servidor, sem passar pelo bundler
-    serverComponentsExternalPackages: ["@electric-sql/pglite", "pg"],
     serverActions: { bodySizeLimit: "30mb" }, // upload de PDFs pelo painel
   },
 };

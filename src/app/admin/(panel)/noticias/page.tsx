@@ -5,7 +5,8 @@ import { Card, DeleteButton, Flash, PageHeader } from "@/components/admin/ui";
 import { formatDate } from "@/lib/format";
 import { deleteNews } from "./actions";
 
-export default async function AdminNewsList({ searchParams }: { searchParams: { ok?: string; erro?: string } }) {
+export default async function AdminNewsList(props: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
+  const searchParams = await props.searchParams;
   const rows = await db.select().from(schema.news).orderBy(desc(schema.news.publishedAt));
 
   return (

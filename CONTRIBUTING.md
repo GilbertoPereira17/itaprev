@@ -11,7 +11,7 @@
 3. **Na dúvida, documentar a suposição** antes de implementar.
 
 ## Stack
-Next.js 14 (App Router, **modo servidor**) · React 18 · TypeScript · Tailwind 3 · lucide-react.
+Next.js 15 (App Router, **modo servidor**) · React 19 · TypeScript · Tailwind 3 · lucide-react.
 Banco **PostgreSQL + Drizzle** (`src/db/schema.ts`). Sem `DATABASE_URL` usa **PGlite** local em `./.data` (dev).
 Painel `/admin` (auth própria: bcrypt + JWT em cookie, `src/lib/auth.ts`, `src/middleware.ts`).
 Conteúdo público lido em `src/lib/content.ts`; uploads em `UPLOAD_DIR` servidos por `/uploads/*`.

@@ -5,7 +5,8 @@ import { Card, Field, Flash, Input, PageHeader, Select, SubmitButton } from "@/c
 import { PASSWORD_RULES } from "@/lib/password";
 import { createUser, resetPassword, resetTwoFactor, toggleUser } from "./actions";
 
-export default async function AdminUsers({ searchParams }: { searchParams: { ok?: string; erro?: string } }) {
+export default async function AdminUsers(props: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
+  const searchParams = await props.searchParams;
   const me = await requireAdmin();
   const users = await db.select().from(schema.users).orderBy(asc(schema.users.name));
 

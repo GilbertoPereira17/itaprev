@@ -34,7 +34,7 @@ type User = typeof schema.users.$inferSelect;
 
 async function startSession(user: User, next: string, mc: boolean) {
   const token = await signSession({ uid: user.id, name: user.name, role: user.role as "admin" | "editor", mc });
-  cookies().set(SESSION_COOKIE, token, cookieOptions(SESSION_MAX_AGE));
+  (await cookies()).set(SESSION_COOKIE, token, cookieOptions(SESSION_MAX_AGE));
   return mc ? "/admin/conta?troca=1" : next;
 }
 
@@ -61,7 +61,7 @@ export async function loginAction(formData: FormData) {
   const mc = user.mustChangePassword || passwordExpired(user.passwordChangedAt);
 
   if (user.totpEnabled) {
-    cookies().set(PENDING_COOKIE, await signPending({ uid: user.id, next, mc }), cookieOptions(PENDING_MAX_AGE));
+    (await cookies()).set(PENDING_COOKIE, await signPending({ uid: user.id, next, mc }), cookieOptions(PENDING_MAX_AGE));
     redirect("/admin/login/2fa");
   }
 
@@ -72,12 +72,12 @@ export async function loginAction(formData: FormData) {
 
 /** Segunda etapa: código de 6 dígitos do aplicativo autenticador */
 export async function verifyTwoFactor(formData: FormData) {
-  const pending = await verifyPending(cookies().get(PENDING_COOKIE)?.value);
+  const pending = await verifyPending((await cookies()).get(PENDING_COOKIE)?.value);
   if (!pending) redirect("/admin/login?erro=expirou");
 
   const key = `2fa:${pending.uid}`;
   if (isLocked(key)) {
-    cookies().delete(PENDING_COOKIE);
+    (await cookies()).delete(PENDING_COOKIE);
     redirect("/admin/login?erro=bloqueado");
   }
 
@@ -92,7 +92,7 @@ export async function verifyTwoFactor(formData: FormData) {
   }
 
   clearFailures(key);
-  cookies().delete(PENDING_COOKIE);
+  (await cookies()).delete(PENDING_COOKIE);
   const dest = await startSession(user, pending.next, pending.mc);
   await audit({ uid: user.id, name: user.name }, "Entrou no painel (com verificação em duas etapas)");
   redirect(dest);
@@ -101,6 +101,6 @@ export async function verifyTwoFactor(formData: FormData) {
 export async function logoutAction() {
   const session = await getSession();
   if (session) await audit(session, "Saiu do painel");
-  cookies().delete(SESSION_COOKIE);
+  (await cookies()).delete(SESSION_COOKIE);
   redirect("/admin/login");
 }

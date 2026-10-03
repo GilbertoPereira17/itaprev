@@ -21,11 +21,12 @@ const codeInput = (
   />
 );
 
-export default async function AccountPage({
-  searchParams,
-}: {
-  searchParams: { ok?: string; erro?: string; troca?: string; configurar?: string };
-}) {
+export default async function AccountPage(
+  props: {
+    searchParams: Promise<{ ok?: string; erro?: string; troca?: string; configurar?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const session = await requireUser();
   const [user] = await db.select().from(schema.users).where(eq(schema.users.id, session.uid));
   const pendingSecret = !user.totpEnabled && searchParams.configurar ? decryptSecret(user.totpSecret) : "";

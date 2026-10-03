@@ -9,7 +9,7 @@ Arquitetura do código: organização de pastas, camadas e padrões. Fonte de ve
 
 ## 1. Visão geral
 
-Aplicação **Next.js 14 (App Router, modo servidor)** com dois domínios no mesmo projeto:
+Aplicação **Next.js 15 (App Router, modo servidor)** com dois domínios no mesmo projeto:
 
 - **Site público** (`src/app/(site)/*`) — renderizado no servidor, conteúdo vindo do banco.
 - **Painel administrativo / CMS** (`src/app/admin/*`) — protegido por sessão, alimenta o site.

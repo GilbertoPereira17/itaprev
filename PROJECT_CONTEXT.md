@@ -79,7 +79,7 @@
 
 ## 4. Stack
 
-- **Aplicação:** Next.js 14 (App Router, modo servidor), React 18, TypeScript
+- **Aplicação:** Next.js 15 (App Router, modo servidor), React 19, TypeScript
 - **Estilo:** Tailwind CSS, lucide-react, tokens CSS da marca
 - **Banco:** PostgreSQL 16 + Drizzle ORM (PGlite local no desenvolvimento)
 - **Autenticação:** própria (bcrypt + JWT em cookie); 2FA a implementar sobre ela

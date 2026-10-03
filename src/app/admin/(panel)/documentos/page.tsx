@@ -7,7 +7,8 @@ import { saveSection } from "./actions";
 import { AREAS } from "./areas";
 
 
-export default async function AdminDocSections({ searchParams }: { searchParams: { ok?: string; erro?: string } }) {
+export default async function AdminDocSections(props: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
+  const searchParams = await props.searchParams;
   const sections = await db
     .select({
       id: schema.docSections.id,

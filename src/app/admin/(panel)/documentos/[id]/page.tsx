@@ -10,13 +10,14 @@ import {
   addDocuments, deleteDocument, deleteGroup, deleteSection, saveGroup, saveSection, updateDocument,
 } from "../actions";
 
-export default async function EditSection({
-  params,
-  searchParams,
-}: {
-  params: { id: string };
-  searchParams: { ok?: string; erro?: string };
-}) {
+export default async function EditSection(
+  props: {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ ok?: string; erro?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const id = Number(params.id);
   const [section] = await db.select().from(schema.docSections).where(eq(schema.docSections.id, id));
   if (!section) notFound();

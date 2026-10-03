@@ -9,11 +9,12 @@ const PAGE_SIZE = 100;
 const fmt = (d: Date) =>
   new Date(d).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "medium" });
 
-export default async function AuditPage({
-  searchParams,
-}: {
-  searchParams: { usuario?: string; busca?: string; pagina?: string };
-}) {
+export default async function AuditPage(
+  props: {
+    searchParams: Promise<{ usuario?: string; busca?: string; pagina?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   await requireAdmin();
   const page = Math.max(1, parseInt(searchParams.pagina ?? "1", 10) || 1);
   const userId = parseInt(searchParams.usuario ?? "", 10);

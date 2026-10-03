@@ -11,7 +11,8 @@ const ERRORS: Record<string, string> = {
   expirou: "O tempo para digitar o código acabou. Entre novamente.",
 };
 
-export default function LoginPage({ searchParams }: { searchParams: { erro?: string; next?: string } }) {
+export default async function LoginPage(props: { searchParams: Promise<{ erro?: string; next?: string }> }) {
+  const searchParams = await props.searchParams;
   const error = searchParams.erro ? ERRORS[searchParams.erro] : null;
 
   return (

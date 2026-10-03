@@ -31,7 +31,8 @@ function SlideForm({ slide, nextOrder }: { slide?: Slide; nextOrder: number }) {
   );
 }
 
-export default async function AdminSlides({ searchParams }: { searchParams: { ok?: string; erro?: string } }) {
+export default async function AdminSlides(props: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
+  const searchParams = await props.searchParams;
   const slides = await db.select().from(schema.slides).orderBy(asc(schema.slides.sortOrder), asc(schema.slides.id));
 
   return (

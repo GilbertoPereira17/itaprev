@@ -4,7 +4,8 @@ import { db, schema } from "@/db";
 import { Card, DeleteButton, Flash, PageHeader } from "@/components/admin/ui";
 import { deletePage } from "./actions";
 
-export default async function AdminPages({ searchParams }: { searchParams: { ok?: string; erro?: string } }) {
+export default async function AdminPages(props: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
+  const searchParams = await props.searchParams;
   const rows = await db.select().from(schema.pages).orderBy(asc(schema.pages.title));
   return (
     <>

@@ -37,7 +37,7 @@ export async function changeOwnPassword(fd: FormData) {
 
   // Renova a sessão sem a marca de "trocar senha"
   const token = await signSession({ uid: user.id, name: user.name, role: user.role as "admin" | "editor" });
-  cookies().set(SESSION_COOKIE, token, {
+  (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production" && process.env.INSECURE_COOKIE !== "1",

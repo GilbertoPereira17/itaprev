@@ -5,12 +5,14 @@ import { DocumentBrowser } from "@/components/content/DocumentBrowser";
 import { getDocSection } from "@/lib/content";
 import { formatBytes, mediaUrl } from "@/lib/format";
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const section = await getDocSection(params.slug);
   return { title: section?.title ?? "Documentos" };
 }
 
-export default async function DocumentSectionPage({ params }: { params: { slug: string } }) {
+export default async function DocumentSectionPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const section = await getDocSection(params.slug);
   if (!section) notFound();
 

@@ -26,7 +26,7 @@ export async function sendMessage(_prev: MessageState, fd: FormData): Promise<Me
   // Campo invisível: pessoas não preenchem, robôs sim. Finge sucesso sem gravar.
   if (field(fd, "website")) return { ok: true, protocol: "—" };
 
-  const ip = (headers().get("x-forwarded-for") ?? "").split(",")[0].trim() || "local";
+  const ip = ((await headers()).get("x-forwarded-for") ?? "").split(",")[0].trim() || "local";
   if (rateLimited(ip)) {
     return { ok: false, error: "Muitos envios em sequência. Aguarde alguns minutos e tente novamente." };
   }

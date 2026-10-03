@@ -18,7 +18,8 @@ function whereFor(filter: string) {
   return and(ne(m.status, "arquivada"), ne(m.status, "respondida"));
 }
 
-export default async function AdminMensagens({ searchParams }: { searchParams: { filtro?: string } }) {
+export default async function AdminMensagens(props: { searchParams: Promise<{ filtro?: string }> }) {
+  const searchParams = await props.searchParams;
   const filter = FILTERS.some((f) => f.key === searchParams.filtro) ? searchParams.filtro! : "abertas";
   const rows = await db
     .select()

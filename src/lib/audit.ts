@@ -10,7 +10,7 @@ type Actor = { uid: number; name: string } | null;
  */
 export async function audit(actor: Actor, action: string, target = "") {
   try {
-    const ip = (headers().get("x-forwarded-for") ?? "").split(",")[0].trim();
+    const ip = ((await headers()).get("x-forwarded-for") ?? "").split(",")[0].trim();
     await db.insert(schema.auditLog).values({
       userId: actor?.uid ?? null,
       userName: actor?.name ?? "",

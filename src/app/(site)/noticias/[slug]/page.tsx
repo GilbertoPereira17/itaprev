@@ -7,12 +7,14 @@ import { RichText } from "@/components/content/RichText";
 import { getNewsBySlug } from "@/lib/content";
 import { formatDate, mediaUrl } from "@/lib/format";
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const n = await getNewsBySlug(params.slug);
   return n ? { title: n.title, description: n.summary } : { title: "Notícia" };
 }
 
-export default async function NoticiaPage({ params }: { params: { slug: string } }) {
+export default async function NoticiaPage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const n = await getNewsBySlug(params.slug);
   if (!n) notFound();
 

@@ -10,7 +10,7 @@ idoso, diretrizes eMAG/WCAG) e conteúdo gerido pela própria equipe do institut
 
 ## Stack
 
-- **Next.js 14** (App Router, modo servidor) · **React 18** · **TypeScript**
+- **Next.js 15** (App Router, modo servidor) · **React 19** · **TypeScript**
 - **Tailwind CSS 3** · `lucide-react`
 - **PostgreSQL + Drizzle ORM** em produção
   (sem `DATABASE_URL`, cai num banco embutido **PGlite** em `./.data` — só para desenvolvimento)

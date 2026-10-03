@@ -6,7 +6,8 @@ import { ALLOWED, uploadRoot } from "@/lib/storage";
  * Serve os arquivos enviados pelo painel em /uploads/…
  * (Em produção o Nginx pode servir a mesma pasta direto — ver DEPLOY.md.)
  */
-export async function GET(_req: Request, { params }: { params: { path: string[] } }) {
+export async function GET(_req: Request, props: { params: Promise<{ path: string[] }> }) {
+  const params = await props.params;
   const root = uploadRoot();
   const full = path.resolve(root, ...params.path);
 

@@ -3,7 +3,8 @@ import { Card, Field, Flash, Input, PageHeader, SubmitButton } from "@/component
 import { saveSettings } from "./actions";
 import { SETTING_KEYS } from "./keys";
 
-export default async function AdminSettings({ searchParams }: { searchParams: { ok?: string; erro?: string } }) {
+export default async function AdminSettings(props: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
+  const searchParams = await props.searchParams;
   const rows = await db.select().from(schema.settings);
   const values = Object.fromEntries(rows.map((r) => [r.key, r.value]));
 

@@ -10,13 +10,14 @@ import { updateMessage } from "../actions";
 const fmt = (d: Date) =>
   new Date(d).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" });
 
-export default async function AdminMensagem({
-  params,
-  searchParams,
-}: {
-  params: { id: string };
-  searchParams: { ok?: string; erro?: string };
-}) {
+export default async function AdminMensagem(
+  props: {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ ok?: string; erro?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const id = parseInt(params.id, 10);
   if (!Number.isFinite(id)) notFound();
   const [m] = await db.select().from(schema.messages).where(eq(schema.messages.id, id));

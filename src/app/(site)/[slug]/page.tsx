@@ -5,12 +5,14 @@ import { RichText } from "@/components/content/RichText";
 import { getPage } from "@/lib/content";
 
 /** Páginas de texto editáveis no painel (ex.: /aposentados, /pensionistas, /pro-gestao) */
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await props.params;
   const page = await getPage(params.slug);
   return { title: page?.title ?? "Página" };
 }
 
-export default async function EditablePage({ params }: { params: { slug: string } }) {
+export default async function EditablePage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const page = await getPage(params.slug);
   if (!page) notFound();
 

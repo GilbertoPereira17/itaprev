@@ -9,9 +9,10 @@ import { verifyTwoFactor } from "../actions";
 
 export const metadata = { title: "Código de verificação", robots: { index: false } };
 
-export default async function TwoFactorPage({ searchParams }: { searchParams: { erro?: string } }) {
+export default async function TwoFactorPage(props: { searchParams: Promise<{ erro?: string }> }) {
+  const searchParams = await props.searchParams;
   // Sem a etapa da senha concluída, volta para o login
-  if (!(await verifyPending(cookies().get(PENDING_COOKIE)?.value))) redirect("/admin/login?erro=expirou");
+  if (!(await verifyPending((await cookies()).get(PENDING_COOKIE)?.value))) redirect("/admin/login?erro=expirou");
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[var(--color-brand-navy)] px-4 py-12">
