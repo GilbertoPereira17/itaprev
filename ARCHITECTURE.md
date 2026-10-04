@@ -118,6 +118,18 @@ atrás de `requireUser`/`requireAdmin`.
 - **Recuperação de acesso** pelo servidor: `npm run admin:recuperar -- email`.
 - Todo HTML de conteúdo passa por `cleanHtml`; todo upload passa por validação de tipo real.
 
+## 4.1. Busca, SEO, acessibilidade e privacidade
+
+- **Busca** (`src/lib/content.ts` → `searchSite`, `searchNews`): ignora acentos e maiúsculas
+  (`translate(lower(...))`), exige todas as palavras; página `/busca`, filtro em `/noticias` e campo em `/transparencia`.
+- **SEO**: `src/app/sitemap.ts` (gerado do banco), `src/app/robots.ts` (bloqueia `/admin` e `/busca`),
+  dados estruturados via `src/components/content/JsonLd.tsx` (GovernmentOrganization no layout, NewsArticle nas notícias),
+  ícones `src/app/icon.png` / `apple-icon.png` e `src/app/manifest.ts` (PWA, base do app). O endereço público vem de `SITE_URL`.
+- **Acessibilidade**: links de salto com `accesskey` 1/2/3 (eMAG) no layout do site; VLibras carregado sob demanda
+  pelo widget de acessibilidade (botão à esquerda para não cobrir o widget).
+- **Privacidade**: `/privacidade` (encarregado configurável em Contatos e links), inventário em `LGPD.md`.
+  O visitante não recebe cookies; os únicos cookies são os de sessão da equipe no painel.
+
 ## 5. Integração com sistemas de terceiros (consulta via API)
 
 Serviços que **já existem em sistemas de terceiros não são reimplementados** — o portal

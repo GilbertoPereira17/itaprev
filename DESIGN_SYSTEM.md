@@ -48,7 +48,7 @@ body.high-contrast {
 
 ## 2. Tipografia & Usabilidade para Idosos
 
-- **Fonte Principal:** `Inter` ou `Plus Jakarta Sans` com `sans-serif` legível.
+- **Fonte Principal:** `Public Sans` (via next/font), com `sans-serif` de reserva.
 - **Tamanho Base de Texto:** `1.125rem` (18px) para parágrafos, facilitando a leitura sem esforço.
 - **Entrelinha Generosa:** `line-height: 1.65` para evitar sobreposição visual.
 - **Hierarquia Clara:**

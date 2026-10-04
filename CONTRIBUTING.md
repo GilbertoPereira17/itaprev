@@ -42,7 +42,7 @@ Rotas: `src/app/(site)/*` (site) e `src/app/admin/*` (painel). Deploy: `DEPLOY.m
 - **Tom sóbrio, sem autopromoção** do instituto — nada de "excelência", "destaque nacional", "referência no Brasil".
 - **Acessibilidade eMAG/WCAG** é prioridade (público idoso): alvos ≥ 48-56px, foco visível, alto contraste (tema escuro) e escala de cinza funcionando.
 - **Ritmo de seções** branco ↔ creme; ícones unificados no azul da marca (sem arco-íris); assinatura dourada nas tags/títulos.
-- Fonte: Plus Jakarta Sans (via next/font).
+- Fonte: Public Sans (via next/font, `src/app/layout.tsx`).
 
 ## Escopo em evolução
 - **App móvel (iOS+Android)** entrou no escopo — via **Capacitor** (empacota o mesmo site). Fase posterior ao site. Detalhes em `PROJECT_CONTEXT.md` §2.1.1.

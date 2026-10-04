@@ -78,6 +78,7 @@ Guia completo de instalação no servidor (PostgreSQL + PM2 + Nginx + HTTPS + ba
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | estrutura do código, banco, camadas e integrações |
 | [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) | identidade visual, cores e tipografia |
 | [`DEPLOY.md`](DEPLOY.md) | instalação e atualização em produção |
+| [`LGPD.md`](LGPD.md) | inventário de dados pessoais (LGPD) |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | convenções de código e regras de operação |
 
 ---

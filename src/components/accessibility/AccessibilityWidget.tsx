@@ -11,13 +11,57 @@ import {
   Eye,
   Volume2,
   Sliders,
+  Hand,
 } from "lucide-react";
+
+declare global {
+  interface Window {
+    VLibrasWidget?: { path?: string; position?: string; open?: () => void };
+  }
+}
+
+const VLIBRAS_URL = "https://vlibras.gov.br/app";
+
+/**
+ * Carrega o VLibras (Governo Federal) só quando a pessoa pede — não pesa para quem não usa.
+ * Versão 7 do VLibras: o carregador cria o botão sozinho e expõe VLibrasWidget.open().
+ * O botão fica à esquerda para não cobrir o botão de acessibilidade (à direita).
+ */
+function openVLibras(onError: () => void) {
+  const tryOpen = () => {
+    const open = window.VLibrasWidget?.open;
+    if (!open) return false;
+    open();
+    return true;
+  };
+  if (document.getElementById("vlibras-script")) {
+    if (!tryOpen()) onError();
+    return;
+  }
+  window.VLibrasWidget = { path: VLIBRAS_URL, position: "l" };
+  const script = document.createElement("script");
+  script.id = "vlibras-script";
+  script.src = `${VLIBRAS_URL}/vlibras-plugin.js`;
+  script.onload = () => {
+    let tries = 0;
+    const timer = setInterval(() => {
+      if (tryOpen()) clearInterval(timer);
+      else if (++tries > 50) {
+        clearInterval(timer);
+        onError();
+      }
+    }, 100);
+  };
+  script.onerror = onError;
+  document.body.appendChild(script);
+}
 
 export function AccessibilityWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [scale, setScale] = useState(1);
   const [highContrast, setHighContrast] = useState(false);
   const [grayscale, setGrayscale] = useState(false);
+  const [librasError, setLibrasError] = useState(false);
 
   useEffect(() => {
     document.documentElement.style.setProperty("--font-scale", scale.toString());
@@ -174,7 +218,30 @@ export function AccessibilityWidget() {
                 </div>
               </div>
 
-              {/* 3. Atalhos Governamentais eMAG */}
+              {/* 3. Tradução para Libras (VLibras, Governo Federal) */}
+              <div className="space-y-3">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Língua Brasileira de Sinais
+                </label>
+                <button
+                  onClick={() => {
+                    setLibrasError(false);
+                    setIsOpen(false);
+                    openVLibras(() => setLibrasError(true));
+                  }}
+                  className="w-full flex items-center gap-2.5 p-3.5 rounded-xl border border-slate-200 bg-slate-50 font-bold text-sm text-slate-800 hover:bg-slate-100"
+                >
+                  <Hand className="w-5 h-5" />
+                  <span>Traduzir para Libras (VLibras)</span>
+                </button>
+                {librasError && (
+                  <p role="alert" className="text-xs text-red-700">
+                    Não foi possível carregar o VLibras agora. Tente novamente em instantes.
+                  </p>
+                )}
+              </div>
+
+              {/* 4. Atalhos Governamentais eMAG */}
               <div className="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs text-slate-600">
                 <div className="font-bold text-slate-900 text-sm mb-1 flex items-center gap-1.5">
                   <Sliders className="w-4 h-4 text-[#005BAC]" />

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown, Phone, MessageCircle, UserRound } from "lucide-react";
+import { Menu, X, ChevronDown, Phone, MessageCircle, UserRound, Search } from "lucide-react";
 import type { NavSection, SiteSettings } from "@/lib/content";
 
 type NavItem = { label: string; href: string };
@@ -95,7 +95,7 @@ export function Header({ navSections, settings }: { navSections: NavSection[]; s
           <Image src="/images/Logo.png" alt="Itanhaém Prev" width={206} height={45} priority className={`h-10 w-auto transition-[filter] duration-300 sm:h-11 ${clear ? "brightness-0 invert" : ""}`} />
         </Link>
 
-        <nav aria-label="Menu principal" className="hidden items-center lg:flex">
+        <nav id="menu-principal" tabIndex={-1} aria-label="Menu principal" className="hidden items-center focus:outline-none lg:flex">
           {nav.map((entry) =>
             entry.children ? (
               <div
@@ -147,6 +147,14 @@ export function Header({ navSections, settings }: { navSections: NavSection[]; s
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/busca"
+            aria-label="Buscar no site"
+            title="Buscar no site"
+            className={`rounded-md p-2.5 ${clear ? "text-white hover:bg-white/10" : "text-slate-800 hover:bg-slate-100"}`}
+          >
+            <Search className="h-5 w-5" aria-hidden />
+          </Link>
           <a
             href={portalSegurado}
             target="_blank"

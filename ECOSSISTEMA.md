@@ -33,22 +33,22 @@ Revisão completa em 04/10/2026, conferida no código.
 | Política de investimentos, carteira, rentabilidade, enquadramento CMN | 🟡 documentos publicados; **dados estruturados** dependem da API 🔒 |
 | Estudos atuariais | ✅ seções Avaliação Atuarial / DRAA / Relatório de Gestão Atuarial |
 | Atos normativos, editais, contratos, portarias | ✅ via seções de documentos (editais/contratos: criar seções quando houver conteúdo) |
-| Categorização, indexação e **busca interna** | 🟡 busca só dentro de cada seção · ⏳ **busca geral** em todos os documentos |
+| Categorização, indexação e **busca interna** | ✅ busca geral `/busca` (documentos, páginas, notícias; ignora acentos) + busca dentro de cada seção |
 | CMS sem dependência do fornecedor | ✅ |
 | Trilha de auditoria (usuário, data, hora) | ✅ `/admin/auditoria` |
-| Adequação à LAI | 🟡 conteúdo ok · ⏳ página de **Política de Privacidade / LGPD** e canal SIC explícito |
+| Adequação à LAI | ✅ conteúdo + Ouvidoria (pedido LAI com protocolo) + Política de Privacidade (`/privacidade`) |
 
 ### Etapa 2 — Portal Institucional
 | Requisito | Status |
 |---|---|
 | Layout responsivo, UX/UI moderno | ✅ |
 | Navegadores atuais | ✅ (testado em Chromium; validar Safari/Firefox na homologação) |
-| Acessibilidade eMAG / WCAG 2.1 | 🟡 widget (fonte, contraste, cinza), foco e alvos grandes · ⏳ **VLibras** (padrão gov.br, gratuito) e auditoria automática (axe/Lighthouse) |
+| Acessibilidade eMAG / WCAG 2.1 | 🟡 widget (fonte, contraste, cinza), **VLibras** sob demanda, atalhos eMAG Alt+1/2/3 com links de salto, foco e alvos grandes · ⏳ auditoria automática (axe/Lighthouse) na homologação |
 | Páginas institucionais, legislação, canais, ouvidoria | ✅ (ouvidoria própria com protocolo) |
-| Notícias com histórico e **busca** | 🟡 histórico ✅ · ⏳ busca de notícias |
+| Notícias com histórico e **busca** | ✅ |
 | Navegação por público (aposentados, pensionistas, ativos) | ✅ |
 | Integração nativa com a Transparência (base única) | ✅ mesmo banco |
-| SEO técnico (URLs semânticas, sitemap.xml, schema.org) | 🟡 URLs ✅ · ⏳ sitemap, robots, dados estruturados |
+| SEO técnico (URLs semânticas, sitemap.xml, schema.org) | ✅ sitemap dinâmico, robots, schema.org (órgão público e notícias), ícone e manifesto |
 
 ### Etapa 3 — Área do Beneficiário (núcleo da futura "central do servidor")
 | Requisito | Status |
@@ -93,7 +93,7 @@ Revisão completa em 04/10/2026, conferida no código.
 | TLS 1.2+ / HTTPS obrigatório | ✅ em produção (`www2`) |
 | Criptografia em repouso quando aplicável | 🟡 segredos 2FA criptografados · ⏳ CPF e dados financeiros da Etapa 3 |
 | Backup diário **incremental**, retenção **mínima de 30 dias**, restauração documentada (RPO/RTO) | 🟡 backup antes de cada atualização + restauração documentada · ⏳ rotina diária com retenção de 30 dias e RPO/RTO escritos |
-| LGPD: mapeamento de dados, base legal, atendimento ao titular | ⏳ inventário de dados + Política de Privacidade + canal do titular (pode usar a Ouvidoria) |
+| LGPD: mapeamento de dados, base legal, atendimento ao titular | 🟡 inventário (`LGPD.md`), Política de Privacidade, canal do titular na Ouvidoria, aviso no chat · ⏳ Instituto designar o encarregado (DPO) e validar com o jurídico |
 | Testes funcionais e de segurança (OWASP Top 10) | 🟡 testes funcionais automatizados no navegador (fora do repositório) · ✅ 0 vulnerabilidades em dependências de produção · ⏳ varredura OWASP (ZAP) e relatório |
 | Ambiente de homologação separado | ⏳ (ex.: `homolog.itanhaemprev...` no mesmo servidor, outro banco) |
 | Homologação formal com relatório | ⏳ |
@@ -141,9 +141,9 @@ está espalhado (GCASP, ProtecWeb, Portal do Segurado, site do instituto).
 ## 3. Ordem recomendada
 
 **Agora (não depende de ninguém):**
-1. Política de Privacidade + LGPD básica (página, encarregado, canal do titular) — exigida pela LAI, pela LGPD e pelas lojas de app.
-2. Busca geral do site (notícias + páginas + documentos) e busca de notícias.
-3. SEO técnico (sitemap, robots, schema.org) + VLibras.
+1. ~~Política de Privacidade + LGPD básica~~ ✅
+2. ~~Busca geral do site e busca de notícias~~ ✅
+3. ~~SEO técnico + VLibras + atalhos eMAG + ícone/manifesto~~ ✅
 4. Backup diário com retenção de 30 dias + RPO/RTO documentados + monitor de disponibilidade.
 5. Versionamento de documentos e permissões por módulo no painel.
 6. Chatbot: base de conhecimento a partir do FAQ do painel + registro das conversas no painel.

@@ -66,7 +66,7 @@ Preencha:
 | `ADMIN_EMAIL` | e-mail do primeiro administrador do painel |
 | `ADMIN_PASSWORD` | deixe **vazio** para gerar uma senha aleatória (aparece uma única vez no passo 5) |
 | `UPLOAD_DIR` | `/var/www/itaprev-uploads` (pasta dos PDFs/imagens — **precisa estar no backup**) |
-| `SITE_URL` | `https://www.itanhaemprev.sp.gov.br` |
+| `SITE_URL` | endereço público **atual** do site, sem barra no fim (ex.: `https://www2.itanhaemprev.sp.gov.br` enquanto estiver no www2). É usado no `sitemap.xml` e no Google |
 
 ```bash
 sudo mkdir -p /var/www/itaprev-uploads
