@@ -20,68 +20,136 @@ Código-fonte e banco são entregues ao Instituto ao final (repositório Git com
 
 ---
 
-## 1. Status por etapa
+## 1. Status por requisito da proposta
 
-Legenda: ✅ pronto e validado · 🟡 parcial · ⏳ pendente
+Legenda: ✅ pronto e validado · 🟡 parcial · ⏳ pendente · 🔒 depende de terceiros (APIs GCASP/ProtecWeb)
+Revisão completa em 04/10/2026, conferida no código.
 
 ### Etapa 1 — Portal da Transparência
-- ✅ Página `/transparencia` + **biblioteca de documentos** gerida pelo painel (seções, grupos,
-  upload de PDFs, busca) — tabelas `docSections` / `docGroups` / `documents`.
-- ✅ Importador do WordPress atual (`npm run db:import-wp`) traz os ~300 documentos existentes.
-- ⏳ **Consulta à API da GCASP** (dados de transparência): encapsular numa camada de serviço em
-  `src/lib/` para exibir os dados com a nossa UI acessível (o portal da GCASP é fraco nisso).
-- ⏳ Trilha de auditoria de publicações (log com usuário, data e hora).
+| Requisito da proposta | Status |
+|---|---|
+| Estrutura organizacional, competências e legislação | ✅ páginas institucionais + seções de legislação |
+| Demonstrativos financeiros/contábeis (balancetes, balanços, DRAA) | ✅ biblioteca de documentos (318 importados) |
+| Política de investimentos, carteira, rentabilidade, enquadramento CMN | 🟡 documentos publicados; **dados estruturados** dependem da API 🔒 |
+| Estudos atuariais | ✅ seções Avaliação Atuarial / DRAA / Relatório de Gestão Atuarial |
+| Atos normativos, editais, contratos, portarias | ✅ via seções de documentos (editais/contratos: criar seções quando houver conteúdo) |
+| Categorização, indexação e **busca interna** | 🟡 busca só dentro de cada seção · ⏳ **busca geral** em todos os documentos |
+| CMS sem dependência do fornecedor | ✅ |
+| Trilha de auditoria (usuário, data, hora) | ✅ `/admin/auditoria` |
+| Adequação à LAI | 🟡 conteúdo ok · ⏳ página de **Política de Privacidade / LGPD** e canal SIC explícito |
 
 ### Etapa 2 — Portal Institucional
-- ✅ Home (banner, acesso rápido, serviços, notícias, FAQ, onde estamos), Institucional,
-  Segurados, Conselhos, Notícias, Contato e **páginas dinâmicas** criadas pelo painel (`/[slug]`).
-- ✅ Acessibilidade (widget eMAG/WCAG: fonte, alto contraste, escala de cinza), responsivo.
-- ⏳ SEO técnico: `sitemap.xml`, `robots.txt` e dados estruturados (schema.org) — ainda não existem.
+| Requisito | Status |
+|---|---|
+| Layout responsivo, UX/UI moderno | ✅ |
+| Navegadores atuais | ✅ (testado em Chromium; validar Safari/Firefox na homologação) |
+| Acessibilidade eMAG / WCAG 2.1 | 🟡 widget (fonte, contraste, cinza), foco e alvos grandes · ⏳ **VLibras** (padrão gov.br, gratuito) e auditoria automática (axe/Lighthouse) |
+| Páginas institucionais, legislação, canais, ouvidoria | ✅ (ouvidoria própria com protocolo) |
+| Notícias com histórico e **busca** | 🟡 histórico ✅ · ⏳ busca de notícias |
+| Navegação por público (aposentados, pensionistas, ativos) | ✅ |
+| Integração nativa com a Transparência (base única) | ✅ mesmo banco |
+| SEO técnico (URLs semânticas, sitemap.xml, schema.org) | 🟡 URLs ✅ · ⏳ sitemap, robots, dados estruturados |
 
-### Etapa 3 — Área do Beneficiário
-- ⏳ Login do segurado por **CPF + senha + 2FA** (auth própria, mesma base do painel).
-- ⏳ **Holerite** (API GCASP), **Informe de Rendimentos** (API ProtecWeb), **Recadastramento /
-  prova de vida** (Portal do Segurado) — consultados via API e exibidos dentro do portal.
-- ⏳ Solicitações/requerimentos com envio de documentos e acompanhamento.
-- Hoje: o acesso rápido da Home e o chatbot já **direcionam** o segurado ao sistema certo.
-- Ponto sensível: dados pessoais → LGPD, criptografia, logs de acesso.
+### Etapa 3 — Área do Beneficiário (núcleo da futura "central do servidor")
+| Requisito | Status |
+|---|---|
+| Login por CPF + senha + 2FA | ⏳ base pronta (TOTP, política de senha, bloqueio) — falta o cadastro do segurado |
+| Holerites e histórico de pagamentos | ⏳🔒 GCASP |
+| Informe de rendimentos | ⏳🔒 ProtecWeb |
+| Atualização cadastral com validação | ⏳🔒 |
+| Recadastramento anual digital com prova de vida | ⏳🔒 Portal do Segurado (definir: integrar ou encaminhar) |
+| Envio de documentos com **controle de versão** | ⏳ |
+| Requerimentos: abertura, acompanhamento, histórico | ⏳ (reaproveitar o módulo de Mensagens: protocolo + status) |
+| Demais informações previdenciárias | ⏳🔒 |
+| Auditoria de acessos do próprio beneficiário | ⏳ (reaproveitar `audit_log`) |
 
 ### Etapa 4 — Painel Administrativo
-- ✅ Painel `/admin` com login, sessão (JWT em cookie, 8h) e rotas protegidas por middleware.
-- ✅ Gestão de **notícias, páginas, banner, documentos, FAQ, configurações (contatos/links)
-  e usuários**; troca da própria senha. Validado de ponta a ponta (criar → editar → publicar).
-- ✅ Papéis `admin` / `editor`.
-- ✅ **Mensagens e Ouvidoria**: fale conosco e ouvidoria do site (com protocolo e opção anônima)
-  chegam no painel, com status e anotação interna.
-- ✅ **Verificação em duas etapas (2FA)** por aplicativo autenticador, com redefinição pelo admin.
-- ✅ **Política de senha**: complexidade, validade de 180 dias, senha provisória com troca obrigatória.
-- ✅ **Registro de atividades (auditoria)** de logins e de todas as alterações do painel.
-- ⏳ RBAC com granularidade por módulo; triagem das solicitações da Etapa 3.
+| Requisito | Status |
+|---|---|
+| Autenticação segura + 2FA | ✅ |
+| RBAC com granularidade por módulo | 🟡 perfis admin/editor · ⏳ permissões por módulo (ex.: só Ouvidoria, só Documentos) |
+| Gestão centralizada de site + transparência | ✅ |
+| Notícias com fluxo de revisão/aprovação (opcional) | ⏳ hoje: publicado / não publicado |
+| Biblioteca de documentos com upload, **versionamento** e categorização | 🟡 upload e categorias ✅ · ⏳ versionamento (hoje o arquivo é substituído) |
+| Painel de triagem das solicitações da Etapa 3 | ⏳ (depende da Etapa 3) |
+| Controle de status das demandas | ✅ Mensagens e Ouvidoria |
+| Auditoria completa | ✅ |
+| Política de senhas (complexidade e expiração) | ✅ |
 
 ### Etapa 5 — Chatbot
-- ✅ Assistente **"Ita"** no site (widget) → fluxo n8n **"ITAPREV - Chatbot Segurado"** →
-  IA OpenAI (gpt-5-mini) com prompt restrito ao instituto, memória por conversa, links reais
-  dos sistemas (GCASP, ProtecWeb, censo) e fallback para WhatsApp/telefone. Testado ao vivo.
-- ⏳ Registro das conversas para auditoria/análise dentro do painel.
+| Requisito | Status |
+|---|---|
+| Atendimento inicial com IA, integrado ao site | ✅ "Ita" (n8n + OpenAI) |
+| **Base de conhecimento configurável** | 🟡 hoje no prompt do n8n · ⏳ usar as **Perguntas frequentes do painel** como base (equipe edita sem a Trius) |
+| Respostas automáticas para dúvidas frequentes | ✅ |
+| Direcionamento para atendimento humano | ✅ WhatsApp/telefone |
+| Registro completo das solicitações para auditoria | ⏳ conversas ficam só no n8n — gravar no banco e mostrar no painel |
+| Mensagens automáticas de confirmação/acompanhamento | 🟡 protocolo na tela · ⏳ e-mail de confirmação (precisa do **SMTP da prefeitura**) |
+| Apoio aos serviços da Área do Beneficiário | ⏳ (depende da Etapa 3) |
 
 ### Etapa 6 — Segurança, LGPD, Testes e Implantação
-- ✅ `DEPLOY.md`: HTTPS (Let's Encrypt), PM2, Nginx, backup diário do banco e dos uploads.
-- ✅ Base de segurança: HTML sanitizado, upload validado por magic bytes, cookie seguro.
-- ⏳ Mapeamento LGPD, varredura OWASP Top 10, ambiente de homologação, relatório de testes,
-  plano de rollback, treinamento da equipe.
+| Requisito | Status |
+|---|---|
+| TLS 1.2+ / HTTPS obrigatório | ✅ em produção (`www2`) |
+| Criptografia em repouso quando aplicável | 🟡 segredos 2FA criptografados · ⏳ CPF e dados financeiros da Etapa 3 |
+| Backup diário **incremental**, retenção **mínima de 30 dias**, restauração documentada (RPO/RTO) | 🟡 backup antes de cada atualização + restauração documentada · ⏳ rotina diária com retenção de 30 dias e RPO/RTO escritos |
+| LGPD: mapeamento de dados, base legal, atendimento ao titular | ⏳ inventário de dados + Política de Privacidade + canal do titular (pode usar a Ouvidoria) |
+| Testes funcionais e de segurança (OWASP Top 10) | 🟡 testes funcionais automatizados no navegador (fora do repositório) · ✅ 0 vulnerabilidades em dependências de produção · ⏳ varredura OWASP (ZAP) e relatório |
+| Ambiente de homologação separado | ⏳ (ex.: `homolog.itanhaemprev...` no mesmo servidor, outro banco) |
+| Homologação formal com relatório | ⏳ |
+| Treinamento | ⏳ (manual do painel + vídeo curto) |
+| Implantação com plano de rollback | ✅ `scripts/atualizar.sh` + `DEPLOY.md` |
+| Logs estruturados e monitoramento de disponibilidade | 🟡 logs do PM2 · ⏳ monitor de disponibilidade (pode ser um fluxo n8n que testa o site a cada 5 min e avisa) |
 
 ---
 
-## 2. Entrega imediata
+## 2. Requisitos da "central do servidor" e do app (pensar desde já)
 
-1. Repositório no GitHub com o **site novo + painel + chatbot funcionando** (estado atual).
-2. **Paulo** provisiona o servidor Node + PostgreSQL na prefeitura e segue o `DEPLOY.md`.
-3. Instituto valida o site no ar e começa a usar o painel.
+Objetivo: o servidor/segurado entra **uma vez** (site ou app) e consulta, num lugar só, o que hoje
+está espalhado (GCASP, ProtecWeb, Portal do Segurado, site do instituto).
 
-## 3. Próximas frentes (após a entrega)
+**Identidade e acesso**
+- Cadastro de beneficiário **separado** dos usuários do painel (tabela própria, nunca misturar papéis).
+- Login por CPF + senha + 2FA. Para público idoso, 2FA também por **código no e-mail** (gratuito, usa SMTP da prefeitura); SMS tem custo.
+- Recuperação de senha por e-mail; primeiro acesso validando dados que o instituto já tem (CPF + data de nascimento + matrícula).
+- Auditoria de cada acesso a dado pessoal (quem viu o holerite de quem, quando).
 
-1. Integração da **API GCASP** na transparência (Etapa 1 completa).
-2. **Área do Beneficiário** com CPF + 2FA consumindo GCASP/ProtecWeb (Etapa 3).
-3. Endurecimento do painel: 2FA, auditoria, política de senha (Etapa 4).
-4. LGPD, testes de segurança, homologação e treinamento (Etapa 6).
-5. App móvel via Capacitor (escopo novo — ver `PROJECT_CONTEXT.md` §2.1.1).
+**Integrações (GCASP / ProtecWeb)**
+- Um módulo por fornecedor em `src/lib/integracoes/`, com interface comum, **tempo limite**, mensagens claras quando o sistema deles estiver fora do ar e link alternativo.
+- **Não guardar** cópia dos dados de terceiros sem necessidade (LGPD: minimização) — buscar na hora; cache curto só se o contrato da API permitir.
+- Credenciais das APIs no `.env` do servidor, nunca no código.
+
+**Busca centralizada**
+- Agora: busca única no site (notícias + páginas + documentos).
+- Depois do login: painel "Meus serviços" reunindo holerites, informes, situação do recadastramento e requerimentos.
+
+**App (Capacitor)**
+- O app abre o próprio site (mesmo código, mesmo login) — nada de segundo sistema.
+- Exigências das lojas: **Política de Privacidade publicada** (obrigatória na Apple e no Google) e, se a conta puder ser criada pelo app, **opção de excluir/solicitar exclusão da conta** (regra da Apple).
+- Recurso nativo: **notificações push** (Firebase, gratuito) — exige guardar o token do aparelho com consentimento.
+- Manifesto PWA e ícones (também ajuda no celular sem app).
+- Hoje o limite de tentativas fica na memória de um processo: se o site passar a rodar em vários processos, mover para o banco.
+
+**LGPD (mais crítico a partir da Etapa 3)**
+- Encarregado (DPO) definido pelo instituto e publicado.
+- Política de Privacidade e termos de uso.
+- Inventário: quais dados, por quê (base legal), por quanto tempo, quem acessa.
+- CPF e dados financeiros: criptografia em repouso, acesso só do titular e de quem atende, tudo auditado.
+
+---
+
+## 3. Ordem recomendada
+
+**Agora (não depende de ninguém):**
+1. Política de Privacidade + LGPD básica (página, encarregado, canal do titular) — exigida pela LAI, pela LGPD e pelas lojas de app.
+2. Busca geral do site (notícias + páginas + documentos) e busca de notícias.
+3. SEO técnico (sitemap, robots, schema.org) + VLibras.
+4. Backup diário com retenção de 30 dias + RPO/RTO documentados + monitor de disponibilidade.
+5. Versionamento de documentos e permissões por módulo no painel.
+6. Chatbot: base de conhecimento a partir do FAQ do painel + registro das conversas no painel.
+
+**Quando as APIs chegarem:** Área do Beneficiário (cadastro, login, Meus serviços) → integrações GCASP/ProtecWeb → requerimentos.
+
+**Antes da entrega final:** homologação separada, varredura OWASP + relatório, treinamento, app (Capacitor).
+
+**Precisamos da prefeitura/instituto:** documentação + acesso de teste das APIs (GCASP, ProtecWeb), **SMTP** para e-mails, definição do **encarregado LGPD**, `pg_dump` instalado no servidor.
