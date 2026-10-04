@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, ExternalLink, FolderOpen } from "lucide-react";
 import { PageHero } from "@/components/layout/PageHero";
+import { SearchBox } from "@/components/content/SearchBox";
 import { getNavSections, getSettings } from "@/lib/content";
 
 export const metadata = { title: "Transparência" };
@@ -19,6 +20,7 @@ export default async function TransparenciaPage() {
           title="Transparência e documentos oficiais"
           description="Atas, relatórios, demonstrativos, legislação e investimentos do Instituto, organizados por assunto."
         />
+        <SearchBox placeholder="Buscar em todos os documentos. Ex.: ata conselho fiscal 2026" label="Buscar documentos" />
 
         {areas.map((area) => (
           <section key={area} className="space-y-5">

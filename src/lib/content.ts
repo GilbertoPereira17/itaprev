@@ -1,6 +1,6 @@
 import "server-only";
 import { unstable_noStore as noStore } from "next/cache";
-import { asc, desc, eq, and } from "drizzle-orm";
+import { and, asc, desc, eq, or, sql, type AnyColumn } from "drizzle-orm";
 import { db, schema } from "@/db";
 
 /** Configurações do site (contatos, links) como mapa chave → valor */
@@ -112,4 +112,59 @@ export async function getDocSection(slug: string) {
 /** Pega uma configuração com valor de reserva */
 export function s(settings: SiteSettings, key: string, fallback = "") {
   return settings[key] || fallback;
+}
+
+// ---------- Busca do site ----------
+// Sem acento e sem diferença de maiúsculas: "previdencia" encontra "Previdência"
+const ACCENTED = "áàâãäéèêëíìîïóòôõöúùûüç";
+const PLAIN = "aaaaaeeeeiiiiooooouuuuc";
+
+export function normalizeQuery(q: string) {
+  return q.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[%_\\]/g, " ").trim();
+}
+
+/** Todas as palavras precisam aparecer em pelo menos um dos campos */
+function matchAll(words: string[], cols: AnyColumn[]) {
+  return and(
+    ...words.map((w) => or(...cols.map((c) => sql`translate(lower(${c}), ${ACCENTED}, ${PLAIN}) like ${`%${w}%`}`)))
+  );
+}
+
+const words = (q: string) => normalizeQuery(q).split(/\s+/).filter((w) => w.length >= 2).slice(0, 6);
+
+export async function searchNews(q: string, limit = 50) {
+  noStore();
+  const w = words(q);
+  if (!w.length) return [];
+  const n = schema.news;
+  return db
+    .select()
+    .from(n)
+    .where(and(eq(n.published, true), matchAll(w, [n.title, n.summary, n.content, n.category])))
+    .orderBy(desc(n.publishedAt))
+    .limit(limit);
+}
+
+export async function searchSite(q: string) {
+  noStore();
+  const w = words(q);
+  if (!w.length) return { news: [], pages: [], documents: [] };
+  const p = schema.pages, d = schema.documents, g = schema.docGroups, s = schema.docSections;
+  const [news, pages, documents] = await Promise.all([
+    searchNews(q, 20),
+    db
+      .select({ title: p.title, slug: p.slug, summary: p.summary })
+      .from(p)
+      .where(and(eq(p.published, true), matchAll(w, [p.title, p.summary, p.content])))
+      .limit(20),
+    db
+      .select({ id: d.id, title: d.title, filePath: d.filePath, group: g.title, section: s.title, sectionSlug: s.slug })
+      .from(d)
+      .innerJoin(g, eq(d.groupId, g.id))
+      .innerJoin(s, eq(g.sectionId, s.id))
+      .where(and(eq(s.published, true), matchAll(w, [d.title, g.title, s.title])))
+      .orderBy(asc(s.sortOrder), asc(g.sortOrder), asc(d.sortOrder))
+      .limit(60),
+  ]);
+  return { news, pages, documents };
 }

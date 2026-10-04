@@ -9,7 +9,7 @@ import { slugify } from "@/lib/format";
 import { cleanHtml } from "@/lib/sanitize";
 
 /** Endereços usados por páginas fixas do site — não podem ser usados por páginas editáveis */
-const RESERVED = ["admin", "noticias", "documentos", "transparencia", "institucional", "segurados", "conselhos", "contato", "uploads", "images"];
+const RESERVED = ["admin", "noticias", "documentos", "transparencia", "institucional", "segurados", "conselhos", "contato", "uploads", "images", "ouvidoria", "privacidade", "busca"];
 
 export async function savePage(fd: FormData) {
   const me = await requireUser();

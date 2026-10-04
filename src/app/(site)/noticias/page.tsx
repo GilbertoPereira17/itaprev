@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { Calendar, ChevronRight } from "lucide-react";
 import { PageHero } from "@/components/layout/PageHero";
-import { getAllNews } from "@/lib/content";
+import { SearchBox } from "@/components/content/SearchBox";
+import { getAllNews, searchNews } from "@/lib/content";
 import { formatDate } from "@/lib/format";
 
 export const metadata = { title: "Notícias e Comunicados" };
 
-export default async function NoticiasPage() {
-  const news = await getAllNews();
+export default async function NoticiasPage(props: { searchParams: Promise<{ q?: string }> }) {
+  const q = ((await props.searchParams).q ?? "").trim().slice(0, 100);
+  const news = q.length >= 2 ? await searchNews(q) : await getAllNews();
 
   return (
     <div className="bg-white py-10 sm:py-12">
@@ -19,9 +21,17 @@ export default async function NoticiasPage() {
           description="Acompanhe publicações, convocações, editais e informativos do Instituto de Previdência de Itanhaém."
         />
 
+        <SearchBox action="/noticias" defaultValue={q} placeholder="Buscar nas notícias. Ex.: audiência, recadastramento" label="Buscar nas notícias" />
+        {q.length >= 2 && (
+          <p role="status" className="-mt-4 text-slate-600">
+            {news.length} notícia(s) para <strong>“{q}”</strong> ·{" "}
+            <Link href="/noticias" className="font-semibold text-[var(--color-brand-blue)] hover:underline">ver todas</Link>
+          </p>
+        )}
+
         {news.length === 0 && (
           <p className="rounded-md border border-dashed border-slate-300 bg-white p-8 text-center text-slate-600">
-            Nenhuma notícia publicada ainda.
+            {q ? "Nenhuma notícia encontrada. Tente outras palavras." : "Nenhuma notícia publicada ainda."}
           </p>
         )}
 
