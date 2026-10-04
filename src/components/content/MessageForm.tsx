@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
+import Link from "next/link";
 import { CheckCircle2, Send } from "lucide-react";
 import { sendMessage, type MessageState } from "@/lib/message-actions";
 import { CONTACT_SUBJECTS, OMBUDSMAN_TYPES } from "@/lib/messages";
@@ -114,8 +115,11 @@ export function MessageForm({ kind }: { kind: "contato" | "ouvidoria" }) {
       <label className="flex items-start gap-3 text-sm text-slate-600">
         <input type="checkbox" name="consent" required className="mt-0.5 h-5 w-5 accent-[var(--color-brand-blue)]" />
         <span>
-          Autorizo o uso dos dados informados exclusivamente para o atendimento desta mensagem, conforme a Lei Geral de
-          Proteção de Dados (LGPD).
+          Autorizo o uso dos dados informados exclusivamente para o atendimento desta mensagem, conforme a{" "}
+          <Link href="/privacidade" target="_blank" className="font-semibold text-[var(--color-brand-blue)] underline">
+            Política de Privacidade
+          </Link>
+          .
         </span>
       </label>
 

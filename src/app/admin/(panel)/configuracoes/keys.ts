@@ -24,4 +24,11 @@ export const SETTING_KEYS = [
       { key: "link.camara", label: "Câmara Municipal" },
     ],
   },
+  {
+    group: "Proteção de dados (LGPD)",
+    fields: [
+      { key: "lgpd.encarregado", label: "Nome do encarregado (DPO)", hint: "Pessoa designada pelo Instituto. Aparece na Política de Privacidade." },
+      { key: "lgpd.email", label: "E-mail do encarregado", hint: "Se ficar vazio, a política mostra o e-mail da ouvidoria." },
+    ],
+  },
 ] as { group: string; fields: { key: string; label: string; hint?: string }[] }[];

@@ -355,8 +355,13 @@ export function ChatWidget() {
             )}
           </div>
 
+          {/* Aviso de privacidade: o texto do chat é processado por IA de terceiro */}
+          <p className="border-t border-slate-200 bg-white px-3 pt-2 text-[11px] leading-snug text-slate-500">
+            Não informe CPF, senhas ou dados pessoais aqui.{" "}
+            <a href="/privacidade" target="_blank" className="font-semibold underline">Privacidade</a>
+          </p>
           {/* Campo de Digitação */}
-          <form onSubmit={handleSend} className="p-3 bg-white border-t border-slate-200 flex gap-2">
+          <form onSubmit={handleSend} className="px-3 pb-3 pt-2 bg-white flex gap-2">
             <input
               type="text"
               value={inputValue}

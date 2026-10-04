@@ -14,6 +14,7 @@ const navLinks = [
   { label: "Notícias", href: "/noticias" },
   { label: "Contato", href: "/contato" },
   { label: "Ouvidoria", href: "/ouvidoria" },
+  { label: "Política de Privacidade", href: "/privacidade" },
 ];
 
 export function Footer({ settings = {} }: { settings?: SiteSettings }) {
@@ -36,7 +37,7 @@ export function Footer({ settings = {} }: { settings?: SiteSettings }) {
   const link = "text-[15px] text-slate-200 hover:text-white hover:underline";
 
   return (
-    <footer className="mt-auto bg-[var(--color-brand-navy)] text-slate-300">
+    <footer id="rodape" tabIndex={-1} className="mt-auto bg-[var(--color-brand-navy)] text-slate-300 focus:outline-none">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-2 lg:grid-cols-4 lg:px-8">
         <div>
           <Image src="/images/Logo.png" alt="Itanhaém Prev" width={206} height={45} className="h-10 w-auto brightness-0 invert" />

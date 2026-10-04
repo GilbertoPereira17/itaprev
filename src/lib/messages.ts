@@ -15,6 +15,7 @@ export const OMBUDSMAN_TYPES = [
   "Reclamação",
   "Denúncia",
   "Solicitação de informação (LAI)",
+  "Meus dados pessoais (LGPD)",
 ];
 
 export const MESSAGE_STATUS: Record<string, string> = {
