@@ -22,7 +22,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         <div className="relative mb-8 hidden h-10 w-44 lg:block">
           <Image src="/images/logo-branco.png" alt="Itanhaém Prev" fill className="object-contain object-left" />
         </div>
-        <AdminNav role={user.role} newMessages={newMessages} />
+        <AdminNav role={user.role} modules={user.modules} newMessages={newMessages} />
         <div className="mt-auto hidden border-t border-white/10 pt-4 lg:block">
           <p className="truncate text-sm font-semibold text-white">{user.name}</p>
           <p className="text-xs text-slate-400">{user.role === "admin" ? "Administrador" : "Editor"}</p>

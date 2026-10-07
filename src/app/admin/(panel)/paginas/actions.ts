@@ -2,7 +2,7 @@
 
 import { and, eq, ne } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { requireUser } from "@/lib/auth";
+import { requireModule } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { bool, done, fail, int, str } from "@/lib/admin";
 import { slugify } from "@/lib/format";
@@ -12,7 +12,7 @@ import { cleanHtml } from "@/lib/sanitize";
 const RESERVED = ["admin", "noticias", "documentos", "transparencia", "institucional", "segurados", "conselhos", "contato", "uploads", "images", "ouvidoria", "privacidade", "busca"];
 
 export async function savePage(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("paginas");
   const id = int(fd, "id");
   const back = id ? `/admin/paginas/${id}` : "/admin/paginas/nova";
   const title = str(fd, "title");
@@ -46,7 +46,7 @@ export async function savePage(fd: FormData) {
 }
 
 export async function deletePage(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("paginas");
   const [old] = await db.select().from(schema.pages).where(eq(schema.pages.id, int(fd, "id")));
   if (old) {
     await db.delete(schema.pages).where(eq(schema.pages.id, old.id));

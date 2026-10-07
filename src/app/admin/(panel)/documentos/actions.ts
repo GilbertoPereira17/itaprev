@@ -2,15 +2,25 @@
 
 import { and, eq, ne, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { requireUser } from "@/lib/auth";
+import { requireModule } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { bool, done, fail, file, int, str } from "@/lib/admin";
 import { slugify } from "@/lib/format";
 import { deleteUpload, saveUpload, UploadError } from "@/lib/storage";
 
+/** Apaga do disco os arquivos das versões anteriores dos documentos informados */
+async function deleteVersionFiles(documentIds: number[]) {
+  if (!documentIds.length) return;
+  const versions = await db
+    .select({ filePath: schema.documentVersions.filePath })
+    .from(schema.documentVersions)
+    .where(inArray(schema.documentVersions.documentId, documentIds));
+  for (const v of versions) await deleteUpload(v.filePath);
+}
+
 // ---------- Seções ----------
 export async function saveSection(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("documentos");
   const id = int(fd, "id");
   const back = id ? `/admin/documentos/${id}` : "/admin/documentos";
   const title = str(fd, "title");
@@ -44,15 +54,16 @@ export async function saveSection(fd: FormData) {
 }
 
 export async function deleteSection(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("documentos");
   const id = int(fd, "id");
   const [section] = await db.select().from(schema.docSections).where(eq(schema.docSections.id, id));
   const groups = await db.select({ id: schema.docGroups.id }).from(schema.docGroups).where(eq(schema.docGroups.sectionId, id));
   if (groups.length) {
     const docs = await db
-      .select({ filePath: schema.documents.filePath })
+      .select({ id: schema.documents.id, filePath: schema.documents.filePath })
       .from(schema.documents)
       .where(inArray(schema.documents.groupId, groups.map((g) => g.id)));
+    await deleteVersionFiles(docs.map((d) => d.id));
     for (const d of docs) await deleteUpload(d.filePath);
   }
   await db.delete(schema.docSections).where(eq(schema.docSections.id, id)); // cascata apaga grupos/documentos
@@ -62,7 +73,7 @@ export async function deleteSection(fd: FormData) {
 
 // ---------- Grupos ----------
 export async function saveGroup(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("documentos");
   const sectionId = int(fd, "sectionId");
   const id = int(fd, "id");
   const back = `/admin/documentos/${sectionId}`;
@@ -79,11 +90,15 @@ export async function saveGroup(fd: FormData) {
 }
 
 export async function deleteGroup(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("documentos");
   const id = int(fd, "id");
   const sectionId = int(fd, "sectionId");
   const [group] = await db.select().from(schema.docGroups).where(eq(schema.docGroups.id, id));
-  const docs = await db.select({ filePath: schema.documents.filePath }).from(schema.documents).where(eq(schema.documents.groupId, id));
+  const docs = await db
+    .select({ id: schema.documents.id, filePath: schema.documents.filePath })
+    .from(schema.documents)
+    .where(eq(schema.documents.groupId, id));
+  await deleteVersionFiles(docs.map((d) => d.id));
   for (const d of docs) await deleteUpload(d.filePath);
   await db.delete(schema.docGroups).where(eq(schema.docGroups.id, id));
   if (group) await audit(me, "Excluiu grupo de documentos (com os arquivos)", group.title);
@@ -92,7 +107,7 @@ export async function deleteGroup(fd: FormData) {
 
 // ---------- Documentos ----------
 export async function addDocuments(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("documentos");
   const groupId = int(fd, "groupId");
   const sectionId = int(fd, "sectionId");
   const back = `/admin/documentos/${sectionId}`;
@@ -124,7 +139,7 @@ export async function addDocuments(fd: FormData) {
 }
 
 export async function updateDocument(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("documentos");
   const id = int(fd, "id");
   const sectionId = int(fd, "sectionId");
   const back = `/admin/documentos/${sectionId}`;
@@ -137,7 +152,16 @@ export async function updateDocument(fd: FormData) {
     try {
       const saved = await saveUpload(replacement, `documentos/${sectionId}`);
       const [old] = await db.select().from(schema.documents).where(eq(schema.documents.id, id));
-      if (old) await deleteUpload(old.filePath);
+      // O arquivo anterior não é apagado: vira uma versão anterior, que pode ser consultada ou restaurada
+      if (old?.filePath) {
+        await db.insert(schema.documentVersions).values({
+          documentId: id,
+          filePath: old.filePath,
+          mimeType: old.mimeType,
+          fileSize: old.fileSize,
+          replacedBy: me.name,
+        });
+      }
       Object.assign(patch, { filePath: saved.path, mimeType: saved.mime, fileSize: saved.size });
     } catch (e) {
       if (e instanceof UploadError) fail(back, e.message);
@@ -150,14 +174,40 @@ export async function updateDocument(fd: FormData) {
 }
 
 export async function deleteDocument(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("documentos");
   const id = int(fd, "id");
   const sectionId = int(fd, "sectionId");
   const [old] = await db.select().from(schema.documents).where(eq(schema.documents.id, id));
   if (old) {
+    await deleteVersionFiles([id]);
     await deleteUpload(old.filePath);
     await db.delete(schema.documents).where(eq(schema.documents.id, id));
     await audit(me, "Excluiu documento", old.title);
   }
   done(`/admin/documentos/${sectionId}`, "Documento excluído.");
+}
+
+/** Volta uma versão anterior a ser a atual; a atual passa para o histórico */
+export async function restoreVersion(fd: FormData) {
+  const me = await requireModule("documentos");
+  const versionId = int(fd, "versionId");
+  const back = `/admin/documentos/${int(fd, "sectionId")}`;
+  const [v] = await db.select().from(schema.documentVersions).where(eq(schema.documentVersions.id, versionId));
+  if (!v) fail(back, "Versão não encontrada.");
+  const [doc] = await db.select().from(schema.documents).where(eq(schema.documents.id, v.documentId));
+  if (!doc) fail(back, "Documento não encontrado.");
+  await db.insert(schema.documentVersions).values({
+    documentId: doc.id,
+    filePath: doc.filePath,
+    mimeType: doc.mimeType,
+    fileSize: doc.fileSize,
+    replacedBy: me.name,
+  });
+  await db
+    .update(schema.documents)
+    .set({ filePath: v.filePath, mimeType: v.mimeType, fileSize: v.fileSize })
+    .where(eq(schema.documents.id, doc.id));
+  await db.delete(schema.documentVersions).where(eq(schema.documentVersions.id, v.id));
+  await audit(me, "Restaurou versão anterior de documento", doc.title);
+  done(back, `Versão anterior de "${doc.title}" restaurada.`);
 }

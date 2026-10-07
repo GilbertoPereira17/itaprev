@@ -1,18 +1,24 @@
 import Link from "next/link";
-import { and, desc, eq, ne } from "drizzle-orm";
+import { and, desc, eq, isNull, ne, notInArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { Card, PageHeader } from "@/components/admin/ui";
 import { MESSAGE_STATUS, STATUS_COLOR as statusColor } from "@/lib/messages";
+import { requireModule } from "@/lib/auth";
 
 const FILTERS = [
   { key: "abertas", label: "Em aberto" },
+  { key: "minhas", label: "Comigo" },
+  { key: "triagem", label: "Sem responsável" },
   { key: "ouvidoria", label: "Ouvidoria" },
   { key: "contato", label: "Fale conosco" },
   { key: "arquivada", label: "Arquivadas" },
 ];
 
-function whereFor(filter: string) {
+function whereFor(filter: string, uid: number) {
   const m = schema.messages;
+  const open = notInArray(m.status, ["arquivada", "respondida"]);
+  if (filter === "minhas") return and(eq(m.assignedTo, uid), open);
+  if (filter === "triagem") return and(isNull(m.assignedTo), open);
   if (filter === "arquivada") return eq(m.status, "arquivada");
   if (filter === "ouvidoria" || filter === "contato") return and(eq(m.kind, filter), ne(m.status, "arquivada"));
   return and(ne(m.status, "arquivada"), ne(m.status, "respondida"));
@@ -20,19 +26,22 @@ function whereFor(filter: string) {
 
 export default async function AdminMensagens(props: { searchParams: Promise<{ filtro?: string }> }) {
   const searchParams = await props.searchParams;
+  const me = await requireModule("mensagens");
   const filter = FILTERS.some((f) => f.key === searchParams.filtro) ? searchParams.filtro! : "abertas";
   const rows = await db
     .select()
     .from(schema.messages)
-    .where(whereFor(filter))
+    .where(whereFor(filter, me.uid))
     .orderBy(desc(schema.messages.createdAt))
     .limit(200);
+  const team = await db.select({ id: schema.users.id, name: schema.users.name }).from(schema.users);
+  const nameOf = new Map(team.map((u) => [u.id, u.name]));
 
   return (
     <>
       <PageHeader
         title="Mensagens e Ouvidoria"
-        description="Tudo o que chega pelo formulário de contato e pela Ouvidoria do site. Abra uma mensagem para registrar o andamento."
+        description="Tudo o que chega pelo formulário de contato e pela Ouvidoria do site. Abra uma mensagem para definir o responsável e registrar o andamento."
       />
 
       <div className="mb-5 flex flex-wrap gap-2">
@@ -71,6 +80,7 @@ export default async function AdminMensagens(props: { searchParams: Promise<{ fi
                 </span>
               </span>
               <span className="shrink-0 text-xs text-slate-500">
+                {m.assignedTo ? `${nameOf.get(m.assignedTo) ?? "—"} · ` : "sem responsável · "}
                 nº {m.protocol} · {new Date(m.createdAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" })}
               </span>
             </Link>

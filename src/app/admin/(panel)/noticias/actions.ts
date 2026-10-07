@@ -2,7 +2,7 @@
 
 import { and, eq, ne } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { requireUser } from "@/lib/auth";
+import { requireModule } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { bool, done, fail, file, int, str } from "@/lib/admin";
 import { slugify } from "@/lib/format";
@@ -10,7 +10,7 @@ import { cleanHtml } from "@/lib/sanitize";
 import { deleteUpload, saveUpload, UploadError } from "@/lib/storage";
 
 export async function saveNews(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("noticias");
   const id = int(fd, "id");
   const back = id ? `/admin/noticias/${id}` : "/admin/noticias/novo";
 
@@ -68,7 +68,7 @@ export async function saveNews(fd: FormData) {
 }
 
 export async function deleteNews(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("noticias");
   const id = int(fd, "id");
   const [old] = await db.select().from(schema.news).where(eq(schema.news.id, id));
   if (old) {

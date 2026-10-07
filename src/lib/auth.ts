@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { SESSION_COOKIE, verifySession, type SessionPayload } from "./session";
+import { canAccess, MODULES, parseModules, type ModuleKey } from "./permissions";
+
+export type PanelUser = SessionPayload & { modules: ModuleKey[] };
 
 /** Sessão atual (ou null) — para Server Components e Server Actions */
 export async function getSession(): Promise<SessionPayload | null> {
@@ -11,20 +14,29 @@ export async function getSession(): Promise<SessionPayload | null> {
 }
 
 /** Exige usuário logado; senão manda para o login */
-export async function requireUser(): Promise<SessionPayload> {
+export async function requireUser(): Promise<PanelUser> {
   const session = await getSession();
   if (!session) redirect("/admin/login");
   // Confere no banco: usuário desativado/excluído perde o acesso imediatamente
   const [user] = await db
-    .select({ active: schema.users.active, role: schema.users.role, name: schema.users.name })
+    .select({ active: schema.users.active, role: schema.users.role, name: schema.users.name, modules: schema.users.modules })
     .from(schema.users)
     .where(eq(schema.users.id, session.uid));
   if (!user || !user.active) redirect("/admin/login");
-  return { ...session, role: user.role as SessionPayload["role"], name: user.name };
+  return { ...session, role: user.role as SessionPayload["role"], name: user.name, modules: parseModules(user.modules) };
+}
+
+/** Exige acesso ao módulo do painel (administrador sempre tem; editor só aos liberados) */
+export async function requireModule(mod: ModuleKey): Promise<PanelUser> {
+  const user = await requireUser();
+  if (!canAccess(user, mod)) {
+    redirect(`/admin?erro=${encodeURIComponent(`Seu usuário não tem acesso a "${MODULES[mod]}". Fale com um administrador.`)}`);
+  }
+  return user;
 }
 
 /** Exige perfil administrador (gestão de usuários) */
-export async function requireAdmin(): Promise<SessionPayload> {
+export async function requireAdmin(): Promise<PanelUser> {
   const session = await requireUser();
   if (session.role !== "admin") redirect("/admin");
   return session;

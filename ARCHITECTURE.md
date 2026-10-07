@@ -65,13 +65,15 @@ src/
 
 | Tabela | Conteúdo |
 |---|---|
-| `users` | usuários do painel (bcrypt, papel/role) |
+| `users` | usuários do painel (bcrypt, papel/role, módulos liberados ao Editor) |
 | `settings` | pares chave-valor (dados do instituto, links, contatos) |
 | `slides` | banner rotativo da Home |
 | `news` | notícias/comunicados |
 | `faqs` | perguntas frequentes |
 | `pages` | páginas institucionais dinâmicas (servidas em `/(site)/[slug]`) |
 | `docSections`, `docGroups`, `documents` | biblioteca de documentos públicos (transparência) |
+| `documentVersions` | versões anteriores de cada documento (guardadas ao trocar o arquivo) |
+| `messages` | contato e ouvidoria, com status, anotação interna e responsável (triagem) |
 
 Migrações geradas por `drizzle-kit` (`npm run db:generate`) em `./drizzle`, aplicadas por
 `npm run db:migrate`. Carga inicial: `npm run db:seed` (idempotente: só preenche tabelas vazias).
@@ -89,7 +91,8 @@ Migrações geradas por `drizzle-kit` (`npm run db:generate`) em `./drizzle`, ap
 
 | Módulo | Responsabilidade |
 |---|---|
-| `auth.ts` | `getSession` / `requireUser` / `requireAdmin` — controle de acesso |
+| `auth.ts` | `getSession` / `requireUser` / `requireModule` / `requireAdmin` — controle de acesso |
+| `permissions.ts` | módulos do painel e regra de acesso por módulo |
 | `session.ts` | assina/verifica o JWT de sessão (cookie `itaprev_session`, 8h) |
 | `content.ts` | leitura do conteúdo público (settings, slides, notícias, páginas) |
 | `admin.ts` | helpers das Server Actions do painel (`done`, `fail`, leitura de FormData) |
@@ -105,6 +108,8 @@ atrás de `requireUser`/`requireAdmin`.
 
 - Autenticação própria: **bcrypt** (senha) + **JWT em cookie** (`jose`), sem dependência paga.
 - `middleware.ts` bloqueia `/admin/*` sem sessão válida (redireciona ao login).
+- **Permissões por módulo**: cada módulo do painel tem um `layout.tsx` com `requireModule(...)` e as
+  Server Actions do módulo chamam o mesmo guarda; o menu só mostra o que o usuário pode acessar.
 - Cookie `secure` em produção (HTTPS); `INSECURE_COOKIE=1` só para teste local sem TLS.
 - **Verificação em duas etapas (TOTP, RFC 6238)** opcional por usuário (`src/lib/totp.ts`), compatível
   com Google/Microsoft Authenticator. O segredo fica criptografado (AES-256-GCM, chave derivada do

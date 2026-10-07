@@ -2,13 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { requireUser } from "@/lib/auth";
+import { requireModule } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { bool, done, fail, file, int, str } from "@/lib/admin";
 import { deleteUpload, saveUpload, UploadError } from "@/lib/storage";
 
 export async function saveSlide(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("slides");
   const id = int(fd, "id");
   const back = "/admin/slides";
   const title = str(fd, "title");
@@ -50,7 +50,7 @@ export async function saveSlide(fd: FormData) {
 }
 
 export async function deleteSlide(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("slides");
   const id = int(fd, "id");
   const [old] = await db.select().from(schema.slides).where(eq(schema.slides.id, id));
   if (old) {

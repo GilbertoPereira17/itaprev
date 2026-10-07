@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
 import { db, schema } from "@/db";
 import { Card, Field, Flash, Select, SubmitButton, Textarea } from "@/components/admin/ui";
@@ -22,6 +22,10 @@ export default async function AdminMensagem(
   if (!Number.isFinite(id)) notFound();
   const [m] = await db.select().from(schema.messages).where(eq(schema.messages.id, id));
   if (!m) notFound();
+  const team = await db
+    .select({ id: schema.users.id, name: schema.users.name, active: schema.users.active })
+    .from(schema.users)
+    .orderBy(asc(schema.users.name));
 
   const contact = [
     ["Nome", m.name],
@@ -75,6 +79,14 @@ export default async function AdminMensagem(
         <h2 className="mb-4 font-bold text-slate-900">Andamento do atendimento</h2>
         <form action={updateMessage} className="space-y-4">
           <input type="hidden" name="id" value={m.id} />
+          <Field label="Responsável" hint="Quem da equipe vai cuidar deste atendimento">
+            <Select name="assignedTo" defaultValue={m.assignedTo ?? ""}>
+              <option value="">Sem responsável (aguardando triagem)</option>
+              {team.filter((u) => u.active || u.id === m.assignedTo).map((u) => (
+                <option key={u.id} value={u.id}>{u.name}</option>
+              ))}
+            </Select>
+          </Field>
           <Field label="Situação">
             <Select name="status" defaultValue={m.status}>
               {Object.entries(MESSAGE_STATUS).map(([k, v]) => (

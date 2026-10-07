@@ -2,13 +2,14 @@ import Link from "next/link";
 import { count, eq } from "drizzle-orm";
 import { Newspaper, FolderOpen, FileText, Images, HelpCircle, Settings, Inbox, ShieldAlert } from "lucide-react";
 import { db, schema } from "@/db";
-import { getSession } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
+import { canAccess, type ModuleKey } from "@/lib/permissions";
+import { Flash } from "@/components/admin/ui";
 
-export default async function Dashboard() {
-  const session = await getSession();
-  const [me] = session
-    ? await db.select({ totpEnabled: schema.users.totpEnabled }).from(schema.users).where(eq(schema.users.id, session.uid))
-    : [];
+export default async function Dashboard(props: { searchParams: Promise<{ ok?: string; erro?: string }> }) {
+  const searchParams = await props.searchParams;
+  const session = await requireUser();
+  const [me] = await db.select({ totpEnabled: schema.users.totpEnabled }).from(schema.users).where(eq(schema.users.id, session.uid));
   const [[news], [docs], [pages], [sections], [newMsgs]] = await Promise.all([
     db.select({ n: count() }).from(schema.news),
     db.select({ n: count() }).from(schema.documents),
@@ -17,25 +18,27 @@ export default async function Dashboard() {
     db.select({ n: count() }).from(schema.messages).where(eq(schema.messages.status, "nova")),
   ]);
 
-  const cards = [
+  const cards: { href: string; label: string; desc: string; icon: typeof Inbox; module: ModuleKey }[] = [
     {
       href: "/admin/mensagens",
       label: "Mensagens e Ouvidoria",
       desc: newMsgs.n ? `${newMsgs.n} nova(s) aguardando` : "Nenhuma mensagem nova",
       icon: Inbox,
+      module: "mensagens",
     },
-    { href: "/admin/noticias/novo", label: "Publicar notícia", desc: `${news.n} publicadas`, icon: Newspaper },
-    { href: "/admin/documentos", label: "Documentos", desc: `${docs.n} arquivos em ${sections.n} seções`, icon: FolderOpen },
-    { href: "/admin/paginas", label: "Páginas de texto", desc: `${pages.n} páginas (Aposentados, Pensionistas…)`, icon: FileText },
-    { href: "/admin/slides", label: "Banner da página inicial", desc: "Imagens e textos do topo do site", icon: Images },
-    { href: "/admin/faq", label: "Perguntas frequentes", desc: "Dúvidas dos segurados", icon: HelpCircle },
-    { href: "/admin/configuracoes", label: "Contatos e links", desc: "Telefone, endereço, horários", icon: Settings },
+    { href: "/admin/noticias/novo", label: "Publicar notícia", desc: `${news.n} publicadas`, icon: Newspaper, module: "noticias" },
+    { href: "/admin/documentos", label: "Documentos", desc: `${docs.n} arquivos em ${sections.n} seções`, icon: FolderOpen, module: "documentos" },
+    { href: "/admin/paginas", label: "Páginas de texto", desc: `${pages.n} páginas (Aposentados, Pensionistas…)`, icon: FileText, module: "paginas" },
+    { href: "/admin/slides", label: "Banner da página inicial", desc: "Imagens e textos do topo do site", icon: Images, module: "slides" },
+    { href: "/admin/faq", label: "Perguntas frequentes", desc: "Dúvidas dos segurados", icon: HelpCircle, module: "faq" },
+    { href: "/admin/configuracoes", label: "Contatos e links", desc: "Telefone, endereço, horários", icon: Settings, module: "configuracoes" },
   ];
 
   return (
     <>
-      <h1 className="text-2xl font-extrabold text-slate-900">Olá, {session?.name?.split(" ")[0]}</h1>
+      <h1 className="text-2xl font-extrabold text-slate-900">Olá, {session.name.split(" ")[0]}</h1>
       <p className="mb-8 mt-1 text-slate-500">O que você quer atualizar no site hoje?</p>
+      <Flash {...searchParams} />
       {me && !me.totpEnabled && (
         <Link
           href="/admin/conta"
@@ -48,7 +51,7 @@ export default async function Dashboard() {
         </Link>
       )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map((c) => (
+        {cards.filter((c) => canAccess(session, c.module)).map((c) => (
           <Link
             key={c.href}
             href={c.href}

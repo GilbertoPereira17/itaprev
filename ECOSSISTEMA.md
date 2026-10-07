@@ -67,11 +67,11 @@ Revisão completa em 04/10/2026, conferida no código.
 | Requisito | Status |
 |---|---|
 | Autenticação segura + 2FA | ✅ |
-| RBAC com granularidade por módulo | 🟡 perfis admin/editor · ⏳ permissões por módulo (ex.: só Ouvidoria, só Documentos) |
+| RBAC com granularidade por módulo | ✅ Administrador (tudo) · Editor com módulos liberados por usuário (ex.: só Ouvidoria, só Documentos) |
 | Gestão centralizada de site + transparência | ✅ |
 | Notícias com fluxo de revisão/aprovação (opcional) | ⏳ hoje: publicado / não publicado |
-| Biblioteca de documentos com upload, **versionamento** e categorização | 🟡 upload e categorias ✅ · ⏳ versionamento (hoje o arquivo é substituído) |
-| Painel de triagem das solicitações da Etapa 3 | ⏳ (depende da Etapa 3) |
+| Biblioteca de documentos com upload, **versionamento** e categorização | ✅ ao trocar o arquivo, o anterior vira versão (consultar/restaurar) |
+| Painel de triagem das solicitações | ✅ responsável por atendimento, filtros "Comigo" e "Sem responsável" (os requerimentos da Etapa 3 entram na mesma fila) |
 | Controle de status das demandas | ✅ Mensagens e Ouvidoria |
 | Auditoria completa | ✅ |
 | Política de senhas (complexidade e expiração) | ✅ |
@@ -145,7 +145,7 @@ está espalhado (GCASP, ProtecWeb, Portal do Segurado, site do instituto).
 2. ~~Busca geral do site e busca de notícias~~ ✅
 3. ~~SEO técnico + VLibras + atalhos eMAG + ícone/manifesto~~ ✅
 4. Backup diário com retenção de 30 dias + RPO/RTO documentados + monitor de disponibilidade.
-5. Versionamento de documentos e permissões por módulo no painel.
+5. ~~Versionamento de documentos, permissões por módulo e triagem no painel~~ ✅
 6. Chatbot: base de conhecimento a partir do FAQ do painel + registro das conversas no painel.
 
 **Quando as APIs chegarem:** Área do Beneficiário (cadastro, login, Meus serviços) → integrações GCASP/ProtecWeb → requerimentos.

@@ -2,12 +2,12 @@
 
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { requireUser } from "@/lib/auth";
+import { requireModule } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { bool, done, fail, int, str } from "@/lib/admin";
 
 export async function saveFaq(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("faq");
   const id = int(fd, "id");
   const question = str(fd, "question");
   const answer = str(fd, "answer");
@@ -20,7 +20,7 @@ export async function saveFaq(fd: FormData) {
 }
 
 export async function deleteFaq(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("faq");
   const [old] = await db.select().from(schema.faqs).where(eq(schema.faqs.id, int(fd, "id")));
   if (old) {
     await db.delete(schema.faqs).where(eq(schema.faqs.id, old.id));

@@ -1,13 +1,13 @@
 "use server";
 
 import { db, schema } from "@/db";
-import { requireUser } from "@/lib/auth";
+import { requireModule } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { done } from "@/lib/admin";
 import { SETTING_KEYS } from "./keys";
 
 export async function saveSettings(fd: FormData) {
-  const me = await requireUser();
+  const me = await requireModule("configuracoes");
   for (const { key } of SETTING_KEYS.flatMap((g) => g.fields)) {
     const value = String(fd.get(key) ?? "").trim();
     await db

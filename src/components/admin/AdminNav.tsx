@@ -6,6 +6,7 @@ import { useState } from "react";
 import {
   LayoutDashboard, Newspaper, FileText, FolderOpen, Images, HelpCircle, Settings, Users, KeyRound, Menu, X, ExternalLink, Inbox, History,
 } from "lucide-react";
+import type { ModuleKey } from "@/lib/permissions";
 
 type Item = {
   href: string;
@@ -15,6 +16,7 @@ type Item = {
   exact?: boolean;
   adminOnly?: boolean;
   badge?: boolean;
+  module?: ModuleKey;
 };
 
 const groups: { title?: string; items: Item[] }[] = [
@@ -22,21 +24,21 @@ const groups: { title?: string; items: Item[] }[] = [
   {
     title: "Conteúdo do site",
     items: [
-      { href: "/admin/noticias", label: "Notícias", icon: Newspaper },
-      { href: "/admin/paginas", label: "Páginas de texto", hint: "Aposentados, Pensionistas, Ativos…", icon: FileText },
-      { href: "/admin/documentos", label: "Documentos", hint: "Transparência, Conselhos, Pró-Gestão", icon: FolderOpen },
-      { href: "/admin/slides", label: "Banner da página inicial", icon: Images },
-      { href: "/admin/faq", label: "Perguntas frequentes", icon: HelpCircle },
+      { href: "/admin/noticias", label: "Notícias", icon: Newspaper, module: "noticias" },
+      { href: "/admin/paginas", label: "Páginas de texto", hint: "Aposentados, Pensionistas, Ativos…", icon: FileText, module: "paginas" },
+      { href: "/admin/documentos", label: "Documentos", hint: "Transparência, Conselhos, Pró-Gestão", icon: FolderOpen, module: "documentos" },
+      { href: "/admin/slides", label: "Banner da página inicial", icon: Images, module: "slides" },
+      { href: "/admin/faq", label: "Perguntas frequentes", icon: HelpCircle, module: "faq" },
     ],
   },
   {
     title: "Atendimento",
-    items: [{ href: "/admin/mensagens", label: "Mensagens e Ouvidoria", icon: Inbox, badge: true }],
+    items: [{ href: "/admin/mensagens", label: "Mensagens e Ouvidoria", icon: Inbox, badge: true, module: "mensagens" }],
   },
   {
     title: "Configurações",
     items: [
-      { href: "/admin/configuracoes", label: "Contatos e links", hint: "Telefones, endereço, horários", icon: Settings },
+      { href: "/admin/configuracoes", label: "Contatos e links", hint: "Telefones, endereço, horários", icon: Settings, module: "configuracoes" },
       { href: "/admin/usuarios", label: "Usuários", icon: Users, adminOnly: true },
       { href: "/admin/auditoria", label: "Registro de atividades", hint: "Quem fez o quê no painel", icon: History, adminOnly: true },
       { href: "/admin/conta", label: "Minha conta", hint: "Senha e verificação em duas etapas", icon: KeyRound },
@@ -44,14 +46,16 @@ const groups: { title?: string; items: Item[] }[] = [
   },
 ];
 
-export function AdminNav({ role, newMessages = 0 }: { role: string; newMessages?: number }) {
+export function AdminNav({ role, modules, newMessages = 0 }: { role: string; modules: ModuleKey[]; newMessages?: number }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   const links = (
     <nav className="space-y-0.5" aria-label="Menu do painel">
       {groups.map((g, gi) => {
-        const visible = g.items.filter((i) => !i.adminOnly || role === "admin");
+        const visible = g.items.filter((i) =>
+          role === "admin" ? true : !i.adminOnly && (!i.module || modules.includes(i.module))
+        );
         if (!visible.length) return null;
         return (
           <div key={gi} className={g.title ? "pt-4" : ""}>

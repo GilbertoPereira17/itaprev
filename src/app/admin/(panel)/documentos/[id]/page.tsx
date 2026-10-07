@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq, inArray } from "drizzle-orm";
 import { ArrowLeft, ExternalLink, FileText, Upload } from "lucide-react";
 import { db, schema } from "@/db";
 import { Card, Checkbox, DeleteButton, Field, Flash, Input, SubmitButton, Textarea } from "@/components/admin/ui";
 import { formatBytes, mediaUrl } from "@/lib/format";
 import { AREAS } from "../areas";
 import {
-  addDocuments, deleteDocument, deleteGroup, deleteSection, saveGroup, saveSection, updateDocument,
+  addDocuments, deleteDocument, deleteGroup, deleteSection, restoreVersion, saveGroup, saveSection, updateDocument,
 } from "../actions";
 
 export default async function EditSection(
@@ -33,6 +33,14 @@ export default async function EditSection(
     .innerJoin(schema.docGroups, eq(schema.documents.groupId, schema.docGroups.id))
     .where(eq(schema.docGroups.sectionId, id))
     .orderBy(asc(schema.documents.sortOrder), asc(schema.documents.id));
+  const docIds = docs.map((x) => x.d.id);
+  const versions = docIds.length
+    ? await db
+        .select()
+        .from(schema.documentVersions)
+        .where(inArray(schema.documentVersions.documentId, docIds))
+        .orderBy(desc(schema.documentVersions.createdAt))
+    : [];
 
   return (
     <>
@@ -125,10 +133,35 @@ export default async function EditSection(
                           </label>
                           <SubmitButton variant="ghost" className="!px-3 !py-2">Salvar</SubmitButton>
                         </form>
+                        {versions.some((v) => v.documentId === d.id) && (
+                          <details className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs">
+                            <summary className="cursor-pointer font-semibold text-slate-600">
+                              Versões anteriores ({versions.filter((v) => v.documentId === d.id).length})
+                            </summary>
+                            <ul className="mt-2 space-y-1.5">
+                              {versions.filter((v) => v.documentId === d.id).map((v) => (
+                                <li key={v.id} className="flex flex-wrap items-center gap-3">
+                                  <span className="text-slate-600">
+                                    Substituída em {new Date(v.createdAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "short", timeStyle: "short" })}
+                                    {v.replacedBy && ` por ${v.replacedBy}`}
+                                  </span>
+                                  <a href={mediaUrl(v.filePath)} target="_blank" className="font-semibold text-[var(--color-brand-blue)] hover:underline">
+                                    abrir {formatBytes(v.fileSize) && `(${formatBytes(v.fileSize)})`}
+                                  </a>
+                                  <form action={restoreVersion}>
+                                    <input type="hidden" name="versionId" value={v.id} />
+                                    <input type="hidden" name="sectionId" value={section.id} />
+                                    <button className="font-semibold text-slate-700 hover:text-[var(--color-brand-blue)]">restaurar esta versão</button>
+                                  </form>
+                                </li>
+                              ))}
+                            </ul>
+                          </details>
+                        )}
                         <form action={deleteDocument} className="mt-1 text-right">
                           <input type="hidden" name="id" value={d.id} />
                           <input type="hidden" name="sectionId" value={section.id} />
-                          <DeleteButton confirmText={`Excluir "${d.title}"?`} />
+                          <DeleteButton confirmText={`Excluir "${d.title}" e as versões anteriores?`} />
                         </form>
                       </li>
                     ))}

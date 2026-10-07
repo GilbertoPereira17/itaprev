@@ -19,6 +19,8 @@ export const users = pgTable(
     totpEnabled: boolean("totp_enabled").notNull().default(false),
     passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }).notNull().defaultNow(),
     mustChangePassword: boolean("must_change_password").notNull().default(false),
+    // Módulos liberados para o perfil Editor (separados por vírgula). Administrador acessa tudo.
+    modules: text("modules").notNull().default("noticias,paginas,documentos,slides,faq,mensagens,configuracoes"),
   },
   (t) => ({ emailIdx: uniqueIndex("users_email_idx").on(t.email) })
 );
@@ -124,6 +126,19 @@ export const documents = pgTable("documents", {
   createdAt: createdAt(),
 });
 
+/** Versões anteriores de um documento (guardadas ao trocar o arquivo) */
+export const documentVersions = pgTable("document_versions", {
+  id: serial("id").primaryKey(),
+  documentId: integer("document_id")
+    .notNull()
+    .references(() => documents.id, { onDelete: "cascade" }),
+  filePath: text("file_path").notNull(),
+  mimeType: text("mime_type").notNull().default("application/pdf"),
+  fileSize: integer("file_size").notNull().default(0),
+  replacedBy: text("replaced_by").notNull().default(""), // quem trocou o arquivo
+  createdAt: createdAt(), // quando deixou de ser a versão atual
+});
+
 /** Mensagens recebidas pelo site: fale conosco e ouvidoria (nunca são apagadas, só arquivadas) */
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
@@ -138,6 +153,8 @@ export const messages = pgTable("messages", {
   anonymous: boolean("anonymous").notNull().default(false),
   status: text("status").notNull().default("nova"), // nova | em_andamento | respondida | arquivada
   internalNote: text("internal_note").notNull().default(""),
+  // Triagem: quem da equipe está cuidando (sem FK: o histórico permanece se o usuário mudar)
+  assignedTo: integer("assigned_to"),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -161,5 +178,6 @@ export type Page = typeof pages.$inferSelect;
 export type DocSection = typeof docSections.$inferSelect;
 export type DocGroup = typeof docGroups.$inferSelect;
 export type DocumentRow = typeof documents.$inferSelect;
+export type DocumentVersion = typeof documentVersions.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type AuditEntry = typeof auditLog.$inferSelect;
