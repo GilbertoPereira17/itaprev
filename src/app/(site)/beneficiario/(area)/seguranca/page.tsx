@@ -1,7 +1,8 @@
+import Link from "next/link";
 import QRCode from "qrcode";
 import { desc, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { requireBeneficiary } from "@/lib/beneficiary";
+import { REQUEST_TYPES, requireBeneficiary } from "@/lib/beneficiary";
 import { PASSWORD_RULES } from "@/lib/password";
 import { decryptSecret, otpauthUrl } from "@/lib/totp";
 import { BField, BInput, BSubmit } from "@/components/beneficiary/ui";
@@ -57,6 +58,19 @@ export default async function BenefSecurity(props: { searchParams: Promise<{ ok?
             <BSubmit variant="ghost">Ativar</BSubmit>
           </form>
         )}
+      </BCard>
+
+      <BCard title="Excluir minha conta">
+        <p className="text-base text-slate-700">
+          Você pode pedir a exclusão do seu acesso à Área do Beneficiário. O Instituto apaga a senha e os dados de contato
+          informados aqui; os registros que a lei obriga a guardar (vínculo previdenciário) continuam com o Instituto.
+        </p>
+        <Link
+          href={`/beneficiario/solicitacoes/nova?assunto=${REQUEST_TYPES.findIndex((t) => t.startsWith("Exclusão"))}`}
+          className="mt-4 inline-block text-base font-semibold text-red-700 underline"
+        >
+          Pedir exclusão da conta
+        </Link>
       </BCard>
 
       <BCard title="Histórico de acessos e alterações">

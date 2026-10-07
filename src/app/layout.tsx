@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Public_Sans } from "next/font/google";
 import "./globals.css";
+import { AppBridge } from "@/components/AppBridge";
 
 const publicSans = Public_Sans({
   subsets: ["latin"],
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </div>
         )}
         {children}
+        <AppBridge />
       </body>
     </html>
   );

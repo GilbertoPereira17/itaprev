@@ -83,6 +83,7 @@ Guia completo de instalação no servidor (PostgreSQL + PM2 + Nginx + HTTPS + ba
 | [`LGPD.md`](LGPD.md) | inventário de dados pessoais (LGPD) |
 | [`SEGURANCA.md`](SEGURANCA.md) | testes de segurança (OWASP Top 10) e riscos conhecidos |
 | [`HOMOLOGACAO.md`](HOMOLOGACAO.md) | roteiro de homologação das entregas |
+| [`mobile/README.md`](mobile/README.md) | aplicativo Android/iOS: gerar e publicar nas lojas |
 | [`MANUAL-PAINEL.md`](MANUAL-PAINEL.md) | manual da equipe para usar o painel (treinamento) |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | convenções de código e regras de operação |
 

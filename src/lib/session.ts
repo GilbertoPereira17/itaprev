@@ -86,3 +86,8 @@ export const signBenef = (p: BenefPayload) => signPurpose(p, "benef", BENEF_MAX_
 export const verifyBenef = (t: string | undefined) => verifyPurpose<BenefPayload>(t, "benef");
 export const signBenefPending = (p: { bid: number }) => signPurpose(p, "benef-2fa", PENDING_MAX_AGE);
 export const verifyBenefPending = (t: string | undefined) => verifyPurpose<{ bid: number }>(t, "benef-2fa");
+
+// Link temporário (2 min) para abrir um documento do beneficiário fora da sessão do navegador
+// (ex.: visualizador de PDF do celular, no app). Vale só para aquele documento.
+export const signDocLink = (p: { did: number; bid: number }) => signPurpose(p, "doc", 120);
+export const verifyDocLink = (t: string | undefined) => verifyPurpose<{ did: number; bid: number }>(t, "doc");

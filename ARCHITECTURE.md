@@ -144,6 +144,13 @@ atrás de `requireUser`/`requireAdmin`.
 - Base de beneficiários: importação CSV (`src/lib/beneficiary-import.ts`) ou pedido de cadastro aprovado pela equipe.
 - Botão "Área do Beneficiário" do site: configuração `link.areaBeneficiario` (vazio = Portal do Segurado atual).
 
+## 4.0.1. Aplicativo (`mobile/`)
+
+Projeto Capacitor separado do site (`package.json` próprio, não entra no build do site). O app carrega o site
+(`server.url` = `APP_URL`) e só mantém localmente a tela offline (`mobile/www/offline.html`). No site,
+`src/components/AppBridge.tsx` só age quando detecta o app (`window.Capacitor.isNativePlatform()`): abre PDFs e
+links externos com o plugin Browser e trata o botão voltar. Detalhes e publicação: `mobile/README.md`.
+
 ## 4.1. Busca, SEO, acessibilidade e privacidade
 
 - **Busca** (`src/lib/content.ts` → `searchSite`, `searchNews`): ignora acentos e maiúsculas

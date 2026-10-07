@@ -25,6 +25,7 @@ export const REQUEST_TYPES = [
   "Certidão de tempo de contribuição (CTC)",
   "Segunda via de documento",
   "Revisão de benefício",
+  "Exclusão da minha conta na Área do Beneficiário (LGPD)",
   "Outro assunto",
 ];
 

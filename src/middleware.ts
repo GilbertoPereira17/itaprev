@@ -10,6 +10,8 @@ export async function middleware(req: NextRequest) {
 
   if (pathname.startsWith("/beneficiario")) {
     if (BENEF_PUBLIC.includes(pathname)) return NextResponse.next();
+    // Link temporário de documento (?t=...): a rota confere o token
+    if (/^\/beneficiario\/arquivo\/\d+$/.test(pathname) && req.nextUrl.searchParams.has("t")) return NextResponse.next();
     const benef = await verifyBenef(req.cookies.get(BENEF_COOKIE)?.value);
     if (!benef) {
       const url = req.nextUrl.clone();

@@ -96,7 +96,7 @@ Revisão completa em 04/10/2026, conferida no código.
 | LGPD: mapeamento de dados, base legal, atendimento ao titular | ✅ inventário (`LGPD.md`), Política de Privacidade, canal do titular na Ouvidoria, aviso e registro mascarado no chat · ⏳ Instituto designar o encarregado (DPO) e validar com o jurídico |
 | Testes funcionais e de segurança (OWASP Top 10) | ✅ relatório `SEGURANCA.md` (A01–A10), `scripts/verificar-seguranca.sh` repetível, cabeçalhos de segurança (CSP, HSTS…), 0 vulnerabilidades em dependências de produção |
 | Ambiente de homologação separado | ✅ procedimento em `DEPLOY.md` (`HOMOLOGACAO=1`: faixa de aviso e fora do Google) · ⏳ TI criar a cópia no servidor |
-| Homologação formal com relatório | ✅ roteiro `HOMOLOGACAO.md` (30 verificações + parecer) · ⏳ execução com o Instituto |
+| Homologação formal com relatório | ✅ roteiro `HOMOLOGACAO.md` (34 verificações + parecer) · ⏳ execução com o Instituto |
 | Treinamento | ✅ `MANUAL-PAINEL.md` · ⏳ sessão com a equipe |
 | Implantação com plano de rollback | ✅ `scripts/atualizar.sh` + `DEPLOY.md` |
 | Logs estruturados e monitoramento de disponibilidade | 🟡 logs do PM2 + `/api/saude` (site e banco) · ⏳ monitor que consulta `/api/saude` a cada 5 min e avisa |
@@ -123,8 +123,11 @@ está espalhado (GCASP, ProtecWeb, Portal do Segurado, site do instituto).
 - Agora: busca única no site (notícias + páginas + documentos).
 - Depois do login: painel "Meus serviços" reunindo holerites, informes, situação do recadastramento e requerimentos.
 
-**App (Capacitor)**
+**App (Capacitor)** — ✅ projeto em `mobile/` (Android e iOS), ver `mobile/README.md`
 - O app abre o próprio site (mesmo código, mesmo login) — nada de segundo sistema.
+- ✅ Tela offline, ícone/abertura, PDFs no visualizador do celular, documento do beneficiário por link de 2 min, botão voltar.
+- ✅ Exclusão de conta: Área do Beneficiário → Segurança → *Pedir exclusão da conta*.
+- ⏳ Contas do Instituto nas lojas (Google Play e Apple Developer); compilação iOS num Mac; publicação.
 - Exigências das lojas: **Política de Privacidade publicada** (obrigatória na Apple e no Google) e, se a conta puder ser criada pelo app, **opção de excluir/solicitar exclusão da conta** (regra da Apple).
 - Recurso nativo: **notificações push** (Firebase, gratuito) — exige guardar o token do aparelho com consentimento.
 - Manifesto PWA e ícones (também ajuda no celular sem app).
@@ -150,6 +153,6 @@ está espalhado (GCASP, ProtecWeb, Portal do Segurado, site do instituto).
 
 **Quando as APIs chegarem:** Área do Beneficiário (cadastro, login, Meus serviços) → integrações GCASP/ProtecWeb → requerimentos.
 
-**Antes da entrega final:** homologação separada, varredura OWASP + relatório, treinamento, app (Capacitor).
+**Antes da entrega final:** ~~homologação separada, varredura OWASP + relatório, treinamento~~ ✅ · app: publicar nas lojas (contas do Instituto).
 
 **Precisamos da prefeitura/instituto:** documentação + acesso de teste das APIs (GCASP, ProtecWeb), **SMTP** para e-mails, definição do **encarregado LGPD**, `pg_dump` instalado no servidor.

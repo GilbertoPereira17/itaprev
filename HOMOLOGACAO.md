@@ -53,14 +53,23 @@ Marque **OK** ou descreva o problema. Itens com problema voltam para correção 
 | 25 | Ativar 2FA do beneficiário; trocar a senha; histórico de acessos mostra tudo | |
 | 26 | Um beneficiário não consegue abrir documento/solicitação de outro | |
 
+## Aplicativo (Android e iOS)
+
+| # | Verificação | Resultado |
+|---|---|---|
+| 27 | Instalar o app: abre com o ícone e a tela de abertura do Instituto e carrega o site | |
+| 28 | Navegar pelo menu, abrir um PDF da Transparência (abre no visualizador) e voltar com o botão voltar | |
+| 29 | Entrar na Área do Beneficiário pelo app e abrir um documento enviado | |
+| 30 | Com o celular sem internet: aparece a tela "Sem conexão" e "Tentar novamente" volta ao site | |
+
 ## Segurança, backup e implantação
 
 | # | Verificação | Resultado |
 |---|---|---|
-| 27 | Site em HTTPS; `bash scripts/verificar-seguranca.sh <endereço>` sem falhas | |
-| 28 | `bash scripts/backup.sh` conclui; arquivo restaurado num banco de teste | |
-| 29 | Atualização com `bash scripts/atualizar.sh` mantém o conteúdo publicado | |
-| 30 | Equipe treinada com o [`MANUAL-PAINEL.md`](MANUAL-PAINEL.md) | |
+| 31 | Site em HTTPS; `bash scripts/verificar-seguranca.sh <endereço>` sem falhas | |
+| 32 | `bash scripts/backup.sh` conclui; arquivo restaurado num banco de teste | |
+| 33 | Atualização com `bash scripts/atualizar.sh` mantém o conteúdo publicado | |
+| 34 | Equipe treinada com o [`MANUAL-PAINEL.md`](MANUAL-PAINEL.md) | |
 
 ## Parecer
 
