@@ -15,7 +15,7 @@ module.exports = {
   server: {
     url,
     // Só o site do Instituto abre dentro do app; outros endereços abrem no navegador do celular
-    allowNavigation: [host, "itanhaemprev.sp.gov.br", "www.itanhaemprev.sp.gov.br", "www2.itanhaemprev.sp.gov.br"],
+    allowNavigation: [...new Set([host, "itanhaemprev.sp.gov.br", "www.itanhaemprev.sp.gov.br", "www2.itanhaemprev.sp.gov.br"])],
     // Tela própria quando o celular está sem internet
     errorPath: "offline.html",
   },
