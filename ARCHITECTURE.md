@@ -74,6 +74,9 @@ src/
 | `docSections`, `docGroups`, `documents` | biblioteca de documentos públicos (transparência) |
 | `documentVersions` | versões anteriores de cada documento (guardadas ao trocar o arquivo) |
 | `messages` | contato e ouvidoria, com status, anotação interna, responsável (triagem), resposta ao cidadão e código de acesso |
+| `beneficiaries` | beneficiários da Área do Beneficiário (CPF criptografado + hash HMAC; senha bcrypt; 2FA) |
+| `beneficiaryDocuments` | documentos enviados (versão por tipo, análise); arquivo criptografado em `PRIVATE_UPLOAD_DIR` |
+| `beneficiaryLog` | trilha de acessos/alterações de cada beneficiário (visível para ele) |
 | `chatbotKnowledge` | base de conhecimento da assistente "Ita" (editada no painel) |
 | `chatLogs` | registro das conversas do chat (dados pessoais ocultados; apagado após 180 dias) |
 
@@ -127,6 +130,19 @@ atrás de `requireUser`/`requireAdmin`.
 - **Cabeçalhos de segurança** em `next.config.mjs` (CSP, HSTS, X-Frame-Options, nosniff, Referrer/Permissions-Policy).
   A CSP libera só `self`, `vlibras.gov.br` e o CDN usado pelo VLibras. Testes e riscos aceitos em `SEGURANCA.md`.
 - **Disponibilidade**: `GET /api/saude` responde 200 se site e banco estão ok (503 se o banco cair).
+
+## 4.0. Área do Beneficiário (`/beneficiario`)
+
+- Rotas em `src/app/(site)/beneficiario/`: `(acesso)` = entrar, código 2FA, primeiro acesso/nova senha, pedido de
+  cadastro; `(area)` = início, dados, solicitações, documentos, segurança (layout chama `requireBeneficiary`).
+- Sessão **separada** da equipe: cookie `itaprev_benef` (2h), token com `purpose: "benef"` — o painel recusa esse
+  token e vice-versa. Trocar a senha invalida sessões antigas (`passwordChangedAt`).
+- `src/lib/data-crypto.ts`: AES-256-GCM (CPF e arquivos) e HMAC do CPF. `src/lib/private-storage.ts`: arquivos
+  criptografados fora da pasta pública; saem só por `/beneficiario/arquivo/[id]` (dono) e
+  `/admin/beneficiarios/arquivo/[id]` (equipe com módulo Beneficiários ou Mensagens).
+- Requerimentos são linhas de `messages` com `kind = "requerimento"` e `beneficiaryId` → mesma triagem do painel.
+- Base de beneficiários: importação CSV (`src/lib/beneficiary-import.ts`) ou pedido de cadastro aprovado pela equipe.
+- Botão "Área do Beneficiário" do site: configuração `link.areaBeneficiario` (vazio = Portal do Segurado atual).
 
 ## 4.1. Busca, SEO, acessibilidade e privacidade
 

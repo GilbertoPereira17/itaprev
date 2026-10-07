@@ -15,6 +15,11 @@ export const SETTING_KEYS = [
   {
     group: "Sistemas e links externos",
     fields: [
+      {
+        key: "link.areaBeneficiario",
+        label: "Botão \"Área do Beneficiário\" do site",
+        hint: "Para usar a área nova deste site, escreva /beneficiario. Vazio: abre o Portal do Segurado atual.",
+      },
       { key: "link.holerite", label: "Holerite (Servidor Online)" },
       { key: "link.portalSegurado", label: "Portal do Segurado / Informe de Rendimentos" },
       { key: "link.censoManual", label: "Manual do recadastramento" },

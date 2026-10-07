@@ -47,7 +47,11 @@ export function Header({ navSections, settings }: { navSections: NavSection[]; s
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const pathname = usePathname();
   const nav = buildNav(navSections);
-  const portalSegurado = settings["link.portalSegurado"] || "#";
+  // Botão "Área do Beneficiário": área própria (/beneficiario) quando ativada nas Configurações;
+  // senão, o Portal do Segurado atual
+  const areaHref = settings["link.areaBeneficiario"] || settings["link.portalSegurado"] || "#";
+  const areaExternal = /^https?:\/\//.test(areaHref);
+  const areaLinkProps = areaExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
   const phone = settings["contato.telefone"] || "(13) 3427-7183";
   const whatsapp = settings["contato.whatsapp"] || "(13) 3426-9426";
   const whatsappUrl = settings["contato.whatsappUrl"] || "#";
@@ -156,9 +160,8 @@ export function Header({ navSections, settings }: { navSections: NavSection[]; s
             <Search className="h-5 w-5" aria-hidden />
           </Link>
           <a
-            href={portalSegurado}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={areaHref}
+            {...areaLinkProps}
             className="hidden items-center gap-2 rounded-md bg-[var(--color-brand-blue)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-brand-navy)] sm:flex"
           >
             <UserRound className="h-4 w-4" aria-hidden />
@@ -205,9 +208,8 @@ export function Header({ navSections, settings }: { navSections: NavSection[]; s
             )
           )}
           <a
-            href={portalSegurado}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={areaHref}
+            {...areaLinkProps}
             className="mt-4 flex items-center justify-center gap-2 rounded-md bg-[var(--color-brand-blue)] py-3.5 text-base font-semibold text-white"
           >
             <UserRound className="h-5 w-5" aria-hidden /> Área do Beneficiário

@@ -14,7 +14,8 @@
 #   4. apaga backups com mais de BACKUP_RETENTION_DAYS dias (padrão: 30)
 #   5. se BACKUP_COPY_DIR estiver definido (ex.: pasta de rede), copia para lá também
 #
-#  Variáveis do .env: DATABASE_URL, UPLOAD_DIR, BACKUP_DIR (padrão ./backups),
+#  Também copia (incremental) a pasta privada dos beneficiários (PRIVATE_UPLOAD_DIR).
+#  Variáveis do .env: DATABASE_URL, UPLOAD_DIR, PRIVATE_UPLOAD_DIR, BACKUP_DIR (padrão ./backups),
 #  BACKUP_RETENTION_DAYS (padrão 30), BACKUP_COPY_DIR (opcional).
 #  Sai com código ≠ 0 se algo falhar (o cron/monitor pode avisar).
 # ============================================================
@@ -52,35 +53,47 @@ espelhar() {
   done
 }
 
+# Cópia incremental de uma pasta em $BACKUP_DIR/<nome>/DATA
+SNAPS_FEITOS=()
+copia_incremental() {
+  local origem="$1" nome="$2"
+  local snaps="$BACKUP_DIR/$nome"
+  mkdir -p "$snaps"
+  local prev; prev="$(ls -1d "$snaps"/20* 2>/dev/null | tail -1 || true)"
+  local snap="$snaps/$STAMP"
+  [ -e "$snap" ] && snap="$snap-$$" # dois backups no mesmo segundo
+  if [ -n "$prev" ]; then cp -al "$prev" "$snap"; fi
+  espelhar "$origem" "$snap"
+  touch "$snap" # data da pasta = data do backup (usada na retenção)
+  SNAPS_FEITOS+=("$nome:$snap")
+  echo "    $nome: $snap ($(find "$snap" -type f | wc -l) arquivos; $( [ -n "$prev" ] && echo "incremental sobre $(basename "$prev")" || echo "primeira cópia completa"))"
+}
+
 if [ -n "${UPLOAD_DIR:-}" ] && [ -d "$UPLOAD_DIR" ]; then
-  SNAPS="$BACKUP_DIR/arquivos"
-  mkdir -p "$SNAPS"
-  PREV="$(ls -1d "$SNAPS"/20* 2>/dev/null | tail -1 || true)"
-  SNAP="$SNAPS/$STAMP"
-  [ -e "$SNAP" ] && SNAP="$SNAP-$$" # dois backups no mesmo segundo
-  if [ -n "$PREV" ]; then cp -al "$PREV" "$SNAP"; fi
-  espelhar "$UPLOAD_DIR" "$SNAP"
-  touch "$SNAP" # data da pasta = data do backup (usada na retenção)
-  echo "    arquivos: $SNAP ($(find "$SNAP" -type f | wc -l) arquivos; $( [ -n "$PREV" ] && echo "incremental sobre $(basename "$PREV")" || echo "primeira cópia completa"))"
+  copia_incremental "$UPLOAD_DIR" arquivos
 else
   echo "    ⚠ UPLOAD_DIR não definido ou inexistente: arquivos enviados NÃO entraram no backup."
 fi
+# Documentos dos beneficiários (já gravados criptografados)
+PRIVADO="${PRIVATE_UPLOAD_DIR:-./privado}"
+if [ -d "$PRIVADO" ]; then copia_incremental "$PRIVADO" privado; fi
 
 # Retenção: remove backups antigos (diários e os feitos antes das atualizações).
 # Apagar uma cópia incremental antiga é seguro: os arquivos que as cópias novas
 # compartilham com ela continuam existindo nelas.
 find "$BACKUP_DIR" -maxdepth 1 -type f -name 'itaprev-*.dump' \
   -mtime +"$RETENTION" -print -delete | sed 's/^/    removido (mais de '"$RETENTION"' dias): /'
-if [ -d "$BACKUP_DIR/arquivos" ]; then
-  find "$BACKUP_DIR/arquivos" -mindepth 1 -maxdepth 1 -type d -name '20*' -mtime +"$RETENTION" -print \
+for nome in arquivos privado; do
+  [ -d "$BACKUP_DIR/$nome" ] || continue
+  find "$BACKUP_DIR/$nome" -mindepth 1 -maxdepth 1 -type d -name '20*' -mtime +"$RETENTION" -print \
     -exec rm -rf {} + | sed 's/^/    removido (mais de '"$RETENTION"' dias): /'
-fi
+done
 
 # Cópia em outro local (recomendado: outro disco ou servidor)
 if [ -n "${BACKUP_COPY_DIR:-}" ]; then
   mkdir -p "$BACKUP_COPY_DIR"
   cp "$DUMP" "$BACKUP_COPY_DIR/"
-  if [ -n "${SNAP:-}" ]; then espelhar "$SNAP" "$BACKUP_COPY_DIR/arquivos-atual"; fi
+  for item in "${SNAPS_FEITOS[@]}"; do espelhar "${item#*:}" "$BACKUP_COPY_DIR/${item%%:*}-atual"; done
   find "$BACKUP_COPY_DIR" -maxdepth 1 -type f -name 'itaprev-*.dump' -mtime +"$RETENTION" -delete
   echo "    cópia em: $BACKUP_COPY_DIR"
 fi

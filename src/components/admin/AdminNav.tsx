@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
-  LayoutDashboard, Bot, Newspaper, FileText, FolderOpen, Images, HelpCircle, Settings, Users, KeyRound, Menu, X, ExternalLink, Inbox, History,
+  LayoutDashboard, Bot, Contact, Newspaper, FileText, FolderOpen, Images, HelpCircle, Settings, Users, KeyRound, Menu, X, ExternalLink, Inbox, History,
 } from "lucide-react";
 import type { ModuleKey } from "@/lib/permissions";
 
@@ -34,7 +34,8 @@ const groups: { title?: string; items: Item[] }[] = [
   {
     title: "Atendimento",
     items: [
-      { href: "/admin/mensagens", label: "Mensagens e Ouvidoria", icon: Inbox, badge: true, module: "mensagens" },
+      { href: "/admin/mensagens", label: "Mensagens e Ouvidoria", hint: "Inclui requerimentos dos beneficiários", icon: Inbox, badge: true, module: "mensagens" },
+      { href: "/admin/beneficiarios", label: "Beneficiários", hint: "Cadastros, documentos e acessos", icon: Contact, module: "beneficiarios" },
       { href: "/admin/assistente", label: "Assistente virtual", hint: "Base de conhecimento e conversas", icon: Bot, module: "chatbot" },
     ],
   },

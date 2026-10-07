@@ -53,15 +53,15 @@ Revisão completa em 04/10/2026, conferida no código.
 ### Etapa 3 — Área do Beneficiário (núcleo da futura "central do servidor")
 | Requisito | Status |
 |---|---|
-| Login por CPF + senha + 2FA | ⏳ base pronta (TOTP, política de senha, bloqueio) — falta o cadastro do segurado |
+| Login por CPF + senha + 2FA | ✅ `/beneficiario`: primeiro acesso (CPF + nascimento + matrícula), 2FA opcional, bloqueio por tentativas, sessão própria |
 | Holerites e histórico de pagamentos | ⏳🔒 GCASP |
 | Informe de rendimentos | ⏳🔒 ProtecWeb |
-| Atualização cadastral com validação | ⏳🔒 |
-| Recadastramento anual digital com prova de vida | ⏳🔒 Portal do Segurado (definir: integrar ou encaminhar) |
-| Envio de documentos com **controle de versão** | ⏳ |
-| Requerimentos: abertura, acompanhamento, histórico | ⏳ (reaproveitar o módulo de Mensagens: protocolo + status) |
-| Demais informações previdenciárias | ⏳🔒 |
-| Auditoria de acessos do próprio beneficiário | ⏳ (reaproveitar `audit_log`) |
+| Atualização cadastral com validação | ✅ contatos pelo próprio beneficiário (validados) · dados sensíveis por requerimento + documento, aplicados pela equipe |
+| Recadastramento anual digital com prova de vida | 🟡 requerimento "Recadastramento / prova de vida" com documentos · ⏳🔒 integração com o Portal do Segurado (3.2) |
+| Envio de documentos com **controle de versão** | ✅ versões por tipo, análise (aceito/recusado com motivo), arquivos criptografados fora da pasta pública |
+| Requerimentos: abertura, acompanhamento, histórico | ✅ protocolo, anexos, resposta da equipe; entram na triagem de Mensagens |
+| Demais informações previdenciárias | 🟡 vínculo, matrícula, benefício e início (planilha do Instituto) · ⏳🔒 demais dados via API |
+| Auditoria de acessos do próprio beneficiário | ✅ histórico visível ao beneficiário (inclui ações da equipe) + registro de quem da equipe consultou |
 
 ### Etapa 4 — Painel Administrativo
 | Requisito | Status |
@@ -96,7 +96,7 @@ Revisão completa em 04/10/2026, conferida no código.
 | LGPD: mapeamento de dados, base legal, atendimento ao titular | ✅ inventário (`LGPD.md`), Política de Privacidade, canal do titular na Ouvidoria, aviso e registro mascarado no chat · ⏳ Instituto designar o encarregado (DPO) e validar com o jurídico |
 | Testes funcionais e de segurança (OWASP Top 10) | ✅ relatório `SEGURANCA.md` (A01–A10), `scripts/verificar-seguranca.sh` repetível, cabeçalhos de segurança (CSP, HSTS…), 0 vulnerabilidades em dependências de produção |
 | Ambiente de homologação separado | ✅ procedimento em `DEPLOY.md` (`HOMOLOGACAO=1`: faixa de aviso e fora do Google) · ⏳ TI criar a cópia no servidor |
-| Homologação formal com relatório | ✅ roteiro `HOMOLOGACAO.md` (22 verificações + parecer) · ⏳ execução com o Instituto |
+| Homologação formal com relatório | ✅ roteiro `HOMOLOGACAO.md` (30 verificações + parecer) · ⏳ execução com o Instituto |
 | Treinamento | ✅ `MANUAL-PAINEL.md` · ⏳ sessão com a equipe |
 | Implantação com plano de rollback | ✅ `scripts/atualizar.sh` + `DEPLOY.md` |
 | Logs estruturados e monitoramento de disponibilidade | 🟡 logs do PM2 + `/api/saude` (site e banco) · ⏳ monitor que consulta `/api/saude` a cada 5 min e avisa |

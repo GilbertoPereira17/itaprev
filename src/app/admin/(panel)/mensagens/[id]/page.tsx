@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { asc, eq } from "drizzle-orm";
-import { ArrowLeft } from "lucide-react";
+import { and, asc, eq } from "drizzle-orm";
+import { ArrowLeft, Paperclip } from "lucide-react";
+import { formatBytes } from "@/lib/format";
 import { db, schema } from "@/db";
 import { Card, Field, Flash, Select, SubmitButton, Textarea } from "@/components/admin/ui";
 import { MESSAGE_STATUS, STATUS_COLOR } from "@/lib/messages";
@@ -22,6 +23,12 @@ export default async function AdminMensagem(
   if (!Number.isFinite(id)) notFound();
   const [m] = await db.select().from(schema.messages).where(eq(schema.messages.id, id));
   if (!m) notFound();
+  const attachments = m.beneficiaryId
+    ? await db
+        .select()
+        .from(schema.beneficiaryDocuments)
+        .where(and(eq(schema.beneficiaryDocuments.requestId, m.id), eq(schema.beneficiaryDocuments.beneficiaryId, m.beneficiaryId)))
+    : [];
   const team = await db
     .select({ id: schema.users.id, name: schema.users.name, active: schema.users.active })
     .from(schema.users)
@@ -29,7 +36,7 @@ export default async function AdminMensagem(
 
   const contact = [
     ["Nome", m.name],
-    ["CPF / matrícula", m.document],
+    [m.kind === "requerimento" ? "Matrícula / nº do benefício" : "CPF / matrícula", m.document],
     ["Telefone", m.phone],
     ["E-mail", m.email],
   ].filter(([, v]) => v);
@@ -50,14 +57,30 @@ export default async function AdminMensagem(
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <Card>
           <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
-            {m.kind === "ouvidoria" ? "Ouvidoria" : "Fale conosco"} · {m.category}
+            {m.kind === "ouvidoria" ? "Ouvidoria" : m.kind === "requerimento" ? "Requerimento (Área do Beneficiário)" : "Fale conosco"} · {m.category}
           </p>
           <p className="mt-1 text-sm text-slate-500">Recebida em {fmt(m.createdAt)}</p>
           <p className="mt-5 whitespace-pre-wrap text-[15px] leading-relaxed text-slate-800">{m.body}</p>
+          {attachments.length > 0 && (
+            <ul className="mt-4 space-y-1.5">
+              {attachments.map((d) => (
+                <li key={d.id}>
+                  <a href={`/admin/beneficiarios/arquivo/${d.id}`} target="_blank" className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-brand-blue)] hover:underline">
+                    <Paperclip className="h-4 w-4" aria-hidden /> {d.fileName} ({formatBytes(d.fileSize)})
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
         </Card>
 
         <Card>
           <h2 className="mb-3 font-bold text-slate-900">Quem enviou</h2>
+          {m.beneficiaryId && (
+            <Link href={`/admin/beneficiarios/${m.beneficiaryId}`} className="mb-3 inline-block text-sm font-semibold text-[var(--color-brand-blue)] hover:underline">
+              Ver cadastro do beneficiário →
+            </Link>
+          )}
           {m.anonymous ? (
             <p className="text-sm text-slate-600">Manifestação anônima (sem dados de contato).</p>
           ) : (
@@ -96,7 +119,11 @@ export default async function AdminMensagem(
           </Field>
           <Field
             label="Resposta ao cidadão"
-            hint={`Aparece para quem enviou ao consultar o protocolo em /acompanhar (com o código ${m.accessCode || "—"}, e-mail ou telefone).`}
+            hint={
+              m.kind === "requerimento"
+                ? "Aparece para o beneficiário na Área do Beneficiário, dentro da solicitação."
+                : `Aparece para quem enviou ao consultar o protocolo em /acompanhar (com o código ${m.accessCode || "—"}, e-mail ou telefone).`
+            }
           >
             <Textarea name="publicReply" rows={4} defaultValue={m.publicReply} placeholder="Ex.: Sua solicitação foi atendida. O documento está disponível no Portal do Segurado." />
           </Field>

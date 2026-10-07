@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { count, eq } from "drizzle-orm";
-import { Bot, Newspaper, FolderOpen, FileText, Images, HelpCircle, Settings, Inbox, ShieldAlert } from "lucide-react";
+import { Bot, Contact, Newspaper, FolderOpen, FileText, Images, HelpCircle, Settings, Inbox, ShieldAlert } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUser } from "@/lib/auth";
 import { canAccess, type ModuleKey } from "@/lib/permissions";
@@ -10,12 +10,13 @@ export default async function Dashboard(props: { searchParams: Promise<{ ok?: st
   const searchParams = await props.searchParams;
   const session = await requireUser();
   const [me] = await db.select({ totpEnabled: schema.users.totpEnabled }).from(schema.users).where(eq(schema.users.id, session.uid));
-  const [[news], [docs], [pages], [sections], [newMsgs]] = await Promise.all([
+  const [[news], [docs], [pages], [sections], [newMsgs], [pendingBenef]] = await Promise.all([
     db.select({ n: count() }).from(schema.news),
     db.select({ n: count() }).from(schema.documents),
     db.select({ n: count() }).from(schema.pages),
     db.select({ n: count() }).from(schema.docSections),
     db.select({ n: count() }).from(schema.messages).where(eq(schema.messages.status, "nova")),
+    db.select({ n: count() }).from(schema.beneficiaries).where(eq(schema.beneficiaries.status, "pendente")),
   ]);
 
   const cards: { href: string; label: string; desc: string; icon: typeof Inbox; module: ModuleKey }[] = [
@@ -25,6 +26,13 @@ export default async function Dashboard(props: { searchParams: Promise<{ ok?: st
       desc: newMsgs.n ? `${newMsgs.n} nova(s) aguardando` : "Nenhuma mensagem nova",
       icon: Inbox,
       module: "mensagens",
+    },
+    {
+      href: "/admin/beneficiarios",
+      label: "Beneficiários",
+      desc: pendingBenef.n ? `${pendingBenef.n} pedido(s) de cadastro aguardando` : "Cadastros e documentos",
+      icon: Contact,
+      module: "beneficiarios",
     },
     { href: "/admin/assistente", label: "Assistente virtual", desc: "O que a Ita sabe e o que perguntam", icon: Bot, module: "chatbot" },
     { href: "/admin/noticias/novo", label: "Publicar notícia", desc: `${news.n} publicadas`, icon: Newspaper, module: "noticias" },

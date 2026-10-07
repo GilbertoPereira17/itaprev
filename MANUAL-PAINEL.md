@@ -68,6 +68,20 @@ Tudo o que chega pelo **Fale conosco** e pela **Ouvidoria** do site, cada um com
 **Acompanhar protocolo** (`/acompanhar`) ele informa o número e o código (ou o e-mail/telefone usado) e vê a
 situação e a resposta.
 
+### Beneficiários (Área do Beneficiário)
+- **Importar planilha:** CSV com `cpf, nome, nascimento, matricula` (opcionais: `vinculo, beneficio,
+  inicio_beneficio, email, telefone, endereco`). Pode importar de novo quando a base mudar.
+- **Pedidos de cadastro:** quem não está na planilha pede pelo site, com documento. Abra, confira e clique
+  **Aprovar cadastro** (ou Recusar).
+- **Cadastro:** corrija nome, nascimento, matrícula, vínculo e benefício (ex.: atendendo a um requerimento).
+- **Documentos:** abra, marque **Aceito** ou **Recusado** (ao recusar, escreva o motivo: o beneficiário vê).
+- **Acesso:** *Redefinir acesso* apaga a senha e o 2FA (a pessoa refaz o Primeiro acesso); *Bloquear* impede a entrada.
+- **Histórico:** tudo o que o beneficiário e a equipe fizeram no cadastro.
+- Os **requerimentos** chegam em **Mensagens e Ouvidoria → Requerimentos**, com os anexos. A "Resposta ao
+  cidadão" aparece para o beneficiário dentro da solicitação.
+
+> Cada vez que alguém da equipe abre um cadastro ou documento de beneficiário, isso fica no Registro de atividades (LGPD).
+
 ### Assistente virtual (Ita)
 - **Base de conhecimento:** escreva o que a Ita deve saber (ex.: prazos do recadastramento, documentos
   necessários). Vale na hora, para as próximas perguntas. Desmarque **Em uso pela Ita** para pausar uma informação.
@@ -105,4 +119,6 @@ usuários e de acesso. Não pode ser editado nem apagado.
 | Nenhum administrador consegue entrar | A TI roda no servidor: `npm run admin:recuperar -- email` |
 | Troquei um PDF errado | **Documentos → Versões anteriores → restaurar esta versão** |
 | A Ita respondeu algo desatualizado | Corrija em **Assistente virtual**, **Perguntas frequentes** ou **Contatos e links** |
+| Beneficiário esqueceu a senha | Ele mesmo usa **Primeiro acesso ou nova senha** (CPF + nascimento + matrícula) |
+| Beneficiário perdeu o celular do 2FA | **Beneficiários → Redefinir acesso** |
 | Menu sem algum módulo | Seu usuário não tem acesso; peça ao administrador em **Usuários → Acesso ao painel** |

@@ -102,7 +102,7 @@ export async function trackProtocol(_prev: TrackState, fd: FormData): Promise<Tr
     ok: true,
     result: {
       protocol: m.protocol,
-      kind: m.kind === "ouvidoria" ? "Ouvidoria" : "Fale conosco",
+      kind: m.kind === "ouvidoria" ? "Ouvidoria" : m.kind === "requerimento" ? "Requerimento" : "Fale conosco",
       category: m.category,
       status: MESSAGE_STATUS[m.status === "arquivada" ? "respondida" : m.status] ?? m.status,
       createdAt: fmt(m.createdAt),

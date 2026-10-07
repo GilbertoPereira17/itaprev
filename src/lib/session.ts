@@ -56,3 +56,33 @@ export async function verifyPending(token: string | undefined): Promise<PendingP
     return null;
   }
 }
+
+// ---- Área do Beneficiário (sessão separada da equipe) ----
+// O token leva purpose "benef": verifySession (painel) o recusa, e vice-versa.
+export const BENEF_COOKIE = "itaprev_benef";
+export const BENEF_MAX_AGE = 60 * 60 * 2; // 2 horas
+export const BENEF_PENDING_COOKIE = "itaprev_benef_2fa";
+export type BenefPayload = { bid: number; name: string; iat?: number };
+
+async function signPurpose(payload: Record<string, unknown>, purpose: string, maxAge: number) {
+  return new SignJWT({ ...payload, purpose })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(`${maxAge}s`)
+    .sign(secretKey());
+}
+
+async function verifyPurpose<T>(token: string | undefined, purpose: string): Promise<T | null> {
+  if (!token) return null;
+  try {
+    const { payload } = await jwtVerify(token, secretKey(), { algorithms: ["HS256"] });
+    return payload.purpose === purpose ? (payload as unknown as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+export const signBenef = (p: BenefPayload) => signPurpose(p, "benef", BENEF_MAX_AGE);
+export const verifyBenef = (t: string | undefined) => verifyPurpose<BenefPayload>(t, "benef");
+export const signBenefPending = (p: { bid: number }) => signPurpose(p, "benef-2fa", PENDING_MAX_AGE);
+export const verifyBenefPending = (t: string | undefined) => verifyPurpose<{ bid: number }>(t, "benef-2fa");

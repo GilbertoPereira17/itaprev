@@ -157,8 +157,72 @@ export const messages = pgTable("messages", {
   accessCode: text("access_code").notNull().default(""), // código para consultar o protocolo (útil no anonimato)
   // Triagem: quem da equipe está cuidando (sem FK: o histórico permanece se o usuário mudar)
   assignedTo: integer("assigned_to"),
+  // Requerimentos da Área do Beneficiário (kind = "requerimento")
+  beneficiaryId: integer("beneficiary_id"),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
+});
+
+/**
+ * Beneficiários (Área do Beneficiário). O CPF é guardado criptografado e com um hash
+ * (HMAC) para busca — nunca em texto puro.
+ */
+export const beneficiaries = pgTable(
+  "beneficiaries",
+  {
+    id: serial("id").primaryKey(),
+    cpfHash: text("cpf_hash").notNull(),
+    cpfEnc: text("cpf_enc").notNull(),
+    name: text("name").notNull(),
+    birthDate: text("birth_date").notNull().default(""), // AAAA-MM-DD
+    registration: text("registration").notNull().default(""), // matrícula ou nº do benefício
+    kind: text("kind").notNull().default(""), // aposentado | pensionista | ativo
+    benefit: text("benefit").notNull().default(""), // descrição do benefício (da planilha do Instituto)
+    benefitStart: text("benefit_start").notNull().default(""), // AAAA-MM-DD
+    email: text("email").notNull().default(""),
+    phone: text("phone").notNull().default(""),
+    address: text("address").notNull().default(""),
+    // pendente = pediu cadastro pelo site e aguarda a equipe · ativo · bloqueado
+    status: text("status").notNull().default("ativo"),
+    origin: text("origin").notNull().default("planilha"), // planilha | site | painel
+    passwordHash: text("password_hash").notNull().default(""), // vazio = ainda não fez o primeiro acesso
+    passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }),
+    totpSecret: text("totp_secret").notNull().default(""),
+    totpEnabled: boolean("totp_enabled").notNull().default(false),
+    lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => ({ cpfIdx: uniqueIndex("beneficiaries_cpf_idx").on(t.cpfHash) })
+);
+
+/** Documentos enviados pelo beneficiário (arquivo criptografado, fora da pasta pública) */
+export const beneficiaryDocuments = pgTable("beneficiary_documents", {
+  id: serial("id").primaryKey(),
+  beneficiaryId: integer("beneficiary_id")
+    .notNull()
+    .references(() => beneficiaries.id, { onDelete: "cascade" }),
+  requestId: integer("request_id"), // requerimento ao qual foi anexado (messages.id)
+  docType: text("doc_type").notNull(), // ex.: RG, comprovante de residência
+  version: integer("version").notNull().default(1), // nova versão a cada reenvio do mesmo tipo
+  fileName: text("file_name").notNull(),
+  filePath: text("file_path").notNull(),
+  mimeType: text("mime_type").notNull(),
+  fileSize: integer("file_size").notNull().default(0),
+  status: text("status").notNull().default("enviado"), // enviado | aceito | recusado
+  reviewNote: text("review_note").notNull().default(""),
+  reviewedBy: text("reviewed_by").notNull().default(""),
+  createdAt: createdAt(),
+});
+
+/** Trilha de acessos e alterações do próprio beneficiário (ele mesmo pode consultar) */
+export const beneficiaryLog = pgTable("beneficiary_log", {
+  id: serial("id").primaryKey(),
+  beneficiaryId: integer("beneficiary_id").notNull(), // sem FK: o registro permanece
+  actor: text("actor").notNull().default("beneficiário"), // beneficiário | nome do servidor da equipe
+  action: text("action").notNull(),
+  ip: text("ip").notNull().default(""),
+  createdAt: createdAt(),
 });
 
 /** Base de conhecimento da assistente virtual (Ita), editada pela equipe */
@@ -202,6 +266,9 @@ export type DocGroup = typeof docGroups.$inferSelect;
 export type DocumentRow = typeof documents.$inferSelect;
 export type DocumentVersion = typeof documentVersions.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+export type Beneficiary = typeof beneficiaries.$inferSelect;
+export type BeneficiaryDocument = typeof beneficiaryDocuments.$inferSelect;
+export type BeneficiaryLogEntry = typeof beneficiaryLog.$inferSelect;
 export type ChatbotKnowledge = typeof chatbotKnowledge.$inferSelect;
 export type ChatLog = typeof chatLogs.$inferSelect;
 export type AuditEntry = typeof auditLog.$inferSelect;

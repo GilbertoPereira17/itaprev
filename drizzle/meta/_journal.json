@@ -36,6 +36,13 @@
       "when": 1791382843309,
       "tag": "0004_assistente_protocolo",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791385203815,
+      "tag": "0005_area_beneficiario",
+      "breakpoints": true
     }
   ]
 }

@@ -40,14 +40,27 @@ Marque **OK** ou descreva o problema. Itens com problema voltam para correção 
 | 17 | Cadastrar uma informação na base de conhecimento e perguntar à Ita sobre ela | |
 | 18 | A conversa aparece em Assistente virtual → Conversas, com CPF ocultado | |
 
+## Área do Beneficiário
+
+| # | Verificação | Resultado |
+|---|---|---|
+| 19 | Importar a planilha (CSV) de beneficiários; linhas com erro são informadas | |
+| 20 | Primeiro acesso com CPF + nascimento + matrícula; dados errados são recusados | |
+| 21 | Ver dados do cadastro; atualizar telefone/e-mail | |
+| 22 | Enviar documento, reenviar (nova versão); equipe aceita/recusa com motivo e o beneficiário vê | |
+| 23 | Abrir solicitação com anexo; equipe responde em Mensagens → Requerimentos; beneficiário vê a resposta | |
+| 24 | Pedir cadastro pelo site (CPF fora da planilha); equipe aprova; primeiro acesso liberado | |
+| 25 | Ativar 2FA do beneficiário; trocar a senha; histórico de acessos mostra tudo | |
+| 26 | Um beneficiário não consegue abrir documento/solicitação de outro | |
+
 ## Segurança, backup e implantação
 
 | # | Verificação | Resultado |
 |---|---|---|
-| 19 | Site em HTTPS; `bash scripts/verificar-seguranca.sh <endereço>` sem falhas | |
-| 20 | `bash scripts/backup.sh` conclui; arquivo restaurado num banco de teste | |
-| 21 | Atualização com `bash scripts/atualizar.sh` mantém o conteúdo publicado | |
-| 22 | Equipe treinada com o [`MANUAL-PAINEL.md`](MANUAL-PAINEL.md) | |
+| 27 | Site em HTTPS; `bash scripts/verificar-seguranca.sh <endereço>` sem falhas | |
+| 28 | `bash scripts/backup.sh` conclui; arquivo restaurado num banco de teste | |
+| 29 | Atualização com `bash scripts/atualizar.sh` mantém o conteúdo publicado | |
+| 30 | Equipe treinada com o [`MANUAL-PAINEL.md`](MANUAL-PAINEL.md) | |
 
 ## Parecer
 

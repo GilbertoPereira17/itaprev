@@ -16,7 +16,7 @@ Os itens marcados como **manual** abaixo são feitos no navegador, com um usuár
 ## Última execução
 
 - **Data:** 07/10/2026 · **Versão:** branch `main` · **Ambiente:** build de produção + PostgreSQL 16
-- `scripts/verificar-seguranca.sh`: **17 OK · 0 falha**
+- `scripts/verificar-seguranca.sh`: **20 OK · 0 falha**
 - `npm audit --omit=dev`: **0 vulnerabilidades** nas dependências que rodam no servidor
 
 | OWASP 2021 | O que foi verificado | Como | Resultado |
@@ -24,15 +24,17 @@ Os itens marcados como **manual** abaixo são feitos no navegador, com um usuár
 | **A01** Controle de acesso | `/admin/*` sem login redireciona ao login | script | ✅ |
 | | Editor sem o módulo não abre a tela nem executa a ação (ex.: Notícias, Usuários) | manual | ✅ |
 | | Arquivos: `../` e codificações não saem da pasta de uploads | script | ✅ |
+| | Área do Beneficiário: um beneficiário não abre documento nem solicitação de outro (404); sessão de beneficiário não entra no painel e vice-versa | manual | ✅ |
+| | Documentos de beneficiários: fora da pasta pública; sem login não são entregues | script + manual | ✅ |
 | | Consulta de protocolo exige nº + código/e-mail/telefone; mensagem de erro não revela se o protocolo existe | manual | ✅ |
-| **A02** Falhas criptográficas | Senhas com bcrypt (custo 12); segredo do 2FA com AES-256-GCM; cookie de sessão `HttpOnly`, `SameSite=Lax`, `Secure` em produção; HSTS | código + script | ✅ |
+| **A02** Falhas criptográficas | CPF e documentos dos beneficiários criptografados (AES-256-GCM; CPF localizado por HMAC); senhas com bcrypt (custo 12); segredo do 2FA com AES-256-GCM; cookie de sessão `HttpOnly`, `SameSite=Lax`, `Secure` em produção; HSTS | código + script | ✅ |
 | **A03** Injeção | Busca com `' OR 1=1; DROP TABLE` responde normalmente (consultas parametrizadas — Drizzle ORM) | script | ✅ |
 | | XSS refletido na busca | script | ✅ |
 | | XSS gravado: notícia com `<script>`, `onerror` e `javascript:` → tudo removido na publicação | manual | ✅ |
 | **A04** Design inseguro | Limites por IP: formulários (5/10 min), consulta de protocolo (5/10 min), chat (20/5 min) | código | ✅ |
 | **A05** Configuração | CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, sem `X-Powered-By`, `/admin` fora dos buscadores | script | ✅ |
 | **A06** Componentes vulneráveis | `npm audit --omit=dev` sem vulnerabilidades | npm | ✅ |
-| **A07** Autenticação | 5 senhas erradas → bloqueio de 10 min (mesmo com a senha certa depois); senha mínima de 10 caracteres com letras e números; validade 180 dias; 2FA opcional (TOTP) | manual | ✅ |
+| **A07** Autenticação | Beneficiário: primeiro acesso exige CPF + nascimento + matrícula; bloqueio por CPF e por IP; trocar a senha derruba sessões antigas · Equipe: 5 senhas erradas → bloqueio de 10 min (mesmo com a senha certa depois); senha mínima de 10 caracteres com letras e números; validade 180 dias; 2FA opcional (TOTP) | manual | ✅ |
 | **A08** Integridade | Upload confere o conteúdo real (magic bytes): executável renomeado para `.pdf` é recusado; migrações que apagam dados são bloqueadas | manual | ✅ |
 | **A09** Registro e monitoramento | Login, falhas, alterações de conteúdo/usuários/acessos ficam no Registro de atividades (sem tela de edição) | manual | ✅ |
 | **A10** SSRF | O servidor só chama endereços fixos da configuração (n8n do chat, site WordPress na importação); nenhum endereço vem do usuário | código | ✅ |

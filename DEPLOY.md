@@ -66,12 +66,16 @@ Preencha:
 | `ADMIN_EMAIL` | e-mail do primeiro administrador do painel |
 | `ADMIN_PASSWORD` | deixe **vazio** para gerar uma senha aleatória (aparece uma única vez no passo 5) |
 | `UPLOAD_DIR` | `/var/www/itaprev-uploads` (pasta dos PDFs/imagens — **precisa estar no backup**) |
+| `PRIVATE_UPLOAD_DIR` | `/var/www/itaprev-privado` (documentos dos beneficiários, criptografados — **fora** do Nginx e **no backup**) |
 | `SITE_URL` | endereço público **atual** do site, sem barra no fim (ex.: `https://www2.itanhaemprev.sp.gov.br` enquanto estiver no www2). É usado no `sitemap.xml` e no Google |
 
 ```bash
-sudo mkdir -p /var/www/itaprev-uploads
-sudo chown -R $USER /var/www/itaprev-uploads
+sudo mkdir -p /var/www/itaprev-uploads /var/www/itaprev-privado
+sudo chown -R $USER /var/www/itaprev-uploads /var/www/itaprev-privado
+chmod 700 /var/www/itaprev-privado
 ```
+> A pasta `itaprev-privado` **não** pode aparecer em nenhum `location`/`alias` do Nginx: os documentos
+> só saem pelo site, depois de conferir quem está pedindo.
 
 ---
 
@@ -217,6 +221,18 @@ pg_restore --clean --if-exists --no-owner -d "postgres://itaprev:SENHA@localhost
 git reset --hard <versão anterior>   # o script mostra qual era
 npm ci --include=dev && npm run build && pm2 start itaprev
 ```
+
+---
+
+## Área do Beneficiário (ativar)
+
+1. Painel → **Beneficiários → Importar planilha**: CSV com `cpf, nome, nascimento, matricula`
+   (opcionais: `vinculo, beneficio, inicio_beneficio, email, telefone, endereco`). Pode importar de novo
+   sempre que a base mudar: CPF existente é atualizado e a senha não muda.
+2. Painel → **Contatos e links → Botão "Área do Beneficiário"**: escreva `/beneficiario`.
+   (Enquanto vazio, o botão continua abrindo o Portal do Segurado atual.)
+3. O beneficiário entra em **Primeiro acesso** com CPF + data de nascimento + matrícula e cria a senha.
+   Quem não estiver na planilha pode **pedir cadastro**; o pedido aparece em Beneficiários para a equipe aprovar.
 
 ---
 

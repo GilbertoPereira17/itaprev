@@ -9,6 +9,7 @@ const FILTERS = [
   { key: "abertas", label: "Em aberto" },
   { key: "minhas", label: "Comigo" },
   { key: "triagem", label: "Sem responsável" },
+  { key: "requerimento", label: "Requerimentos" },
   { key: "ouvidoria", label: "Ouvidoria" },
   { key: "contato", label: "Fale conosco" },
   { key: "arquivada", label: "Arquivadas" },
@@ -20,7 +21,7 @@ function whereFor(filter: string, uid: number) {
   if (filter === "minhas") return and(eq(m.assignedTo, uid), open);
   if (filter === "triagem") return and(isNull(m.assignedTo), open);
   if (filter === "arquivada") return eq(m.status, "arquivada");
-  if (filter === "ouvidoria" || filter === "contato") return and(eq(m.kind, filter), ne(m.status, "arquivada"));
+  if (filter === "ouvidoria" || filter === "contato" || filter === "requerimento") return and(eq(m.kind, filter), ne(m.status, "arquivada"));
   return and(ne(m.status, "arquivada"), ne(m.status, "respondida"));
 }
 
@@ -41,7 +42,7 @@ export default async function AdminMensagens(props: { searchParams: Promise<{ fi
     <>
       <PageHeader
         title="Mensagens e Ouvidoria"
-        description="Tudo o que chega pelo formulário de contato e pela Ouvidoria do site. Abra uma mensagem para definir o responsável e registrar o andamento."
+        description="Tudo o que chega pelo Fale conosco, pela Ouvidoria e pelos requerimentos da Área do Beneficiário. Abra para definir o responsável e registrar o andamento."
       />
 
       <div className="mb-5 flex flex-wrap gap-2">
@@ -73,7 +74,7 @@ export default async function AdminMensagens(props: { searchParams: Promise<{ fi
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-semibold text-slate-900">
-                  {m.kind === "ouvidoria" ? "Ouvidoria · " : ""}{m.category}
+                  {m.kind === "ouvidoria" ? "Ouvidoria · " : m.kind === "requerimento" ? "Requerimento · " : ""}{m.category}
                 </span>
                 <span className="block truncate text-sm text-slate-500">
                   {m.anonymous ? "Anônimo" : m.name} — {m.body.slice(0, 90)}

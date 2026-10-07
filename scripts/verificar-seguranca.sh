@@ -38,6 +38,9 @@ echo "[A01] Controle de acesso"
 check "/admin sem login redireciona para o login"            '[[ "$(code "$BASE/admin")" =~ ^30[1-8]$ ]]'
 check "/admin/usuarios sem login é bloqueado"                '[[ "$(code "$BASE/admin/usuarios")" =~ ^30[1-8]$ ]]'
 check "/admin/auditoria sem login é bloqueado"               '[[ "$(code "$BASE/admin/auditoria")" =~ ^30[1-8]$ ]]'
+check "Área do Beneficiário sem login redireciona para entrar" '[[ "$(code "$BASE/beneficiario")" =~ ^30[1-8]$ ]]'
+check "Documento de beneficiário sem login não é entregue"   '[ "$(code "$BASE/beneficiario/arquivo/1")" != "200" ] && [ "$(code "$BASE/admin/beneficiarios/arquivo/1")" != "200" ]'
+check "Pasta privada não é servida em /uploads"               '[ "$(code "$BASE/uploads/../privado/x.bin")" != "200" ]'
 check "Uploads: ../ não sai da pasta (path traversal)"       '[ "$(code "$BASE/uploads/../.env")" != "200" ] && [ "$(code "$BASE/uploads/..%2f..%2f.env")" != "200" ]'
 check "Uploads: tipo não permitido não é servido (.html)"    '[ "$(code "$BASE/uploads/teste.html")" != "200" ]'
 

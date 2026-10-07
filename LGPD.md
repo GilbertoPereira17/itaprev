@@ -17,6 +17,10 @@ Controlador: Itanhaém Prev. Encarregado (DPO): definido pelo Instituto e config
 | Texto digitado no chat + identificador aleatório da conversa | Assistente "Ita" | n8n da Trius (memória da conversa) e provedor de IA (OpenAI, EUA) | Responder dúvidas | Execução de política pública; aviso no chat | Memória de curto prazo do fluxo; histórico de execuções do n8n | Trius (operador) |
 | Pergunta e resposta do chat (CPF, e-mail e telefone **ocultados** antes de gravar; sem IP) | Assistente "Ita" | Banco (`chat_logs`) | Auditoria e melhoria da base de conhecimento | Execução de política pública / legítimo interesse | **180 dias** (apagado automaticamente) | Equipe com o módulo "Assistente virtual" |
 | Nº do protocolo + código de acesso | Fale conosco / Ouvidoria | Banco (`messages`) | Permitir que o próprio cidadão acompanhe a manifestação em /acompanhar | Idem às mensagens | Idem às mensagens | O próprio cidadão (com código, e-mail ou telefone) e a equipe |
+| CPF (**criptografado** AES-256-GCM + hash HMAC para busca), nome, nascimento, matrícula, vínculo, benefício | Planilha do Instituto / pedido de cadastro / equipe | Banco (`beneficiaries`) | Identificar o beneficiário e prestar os serviços | Execução de políticas públicas (art. 7º III e art. 23) | Enquanto houver vínculo com o RPPS + prazos legais | O próprio beneficiário; equipe com o módulo "Beneficiários" (cada consulta é registrada) |
+| E-mail, telefone, endereço; senha (bcrypt); segredo 2FA (criptografado) | O próprio beneficiário | Banco (`beneficiaries`) | Contato e acesso | Idem | Idem | Idem |
+| Documentos pessoais (RG, comprovantes, laudos) | Beneficiário | Pasta privada **criptografada** (`PRIVATE_UPLOAD_DIR`, fora do Nginx) + `beneficiary_documents` | Recadastramento, requerimentos, conferência | Idem; dado sensível de saúde (laudo): art. 11 II b | **A definir pelo Instituto** (sugestão: 5 anos após a análise) | Idem |
+| Acessos e alterações (data, ação, IP) | Uso da Área do Beneficiário | Banco (`beneficiary_log`) | Segurança e transparência ao titular | Segurança / Marco Civil | Permanente (trilha) | O próprio beneficiário e a equipe |
 | Nome, e-mail, senha (hash bcrypt), segredo 2FA (criptografado), perfil | Usuários do painel | Banco (`users`) | Controle de acesso | Art. 7º II/III | Enquanto a pessoa tiver acesso (desativação não apaga, para manter a auditoria) | Administradores |
 | Nome do usuário, ação, item, IP, data/hora | Uso do painel | Banco (`audit_log`) | Auditoria e segurança | Obrigação legal / segurança | Permanente (trilha de auditoria) | Administradores |
 | IP, data/hora, URL | Acesso ao site | Logs do servidor (Nginx/PM2) | Segurança e funcionamento | Marco Civil, art. 15 | Mínimo de 6 meses (Marco Civil) — política do servidor | TI da prefeitura |
@@ -39,12 +43,13 @@ Os cookies existentes (`itaprev_session`, `itaprev_2fa`) são **essenciais** e s
 Canal: **Ouvidoria → tipo "Meus dados pessoais (LGPD)"** ou e-mail do encarregado. O pedido entra em
 **Painel → Mensagens e Ouvidoria** com protocolo; o andamento fica registrado e auditado.
 
-## 4. A fazer antes da Área do Beneficiário (Etapa 3)
+## 4. Área do Beneficiário — situação
 
+- [x] Inventário: CPF, dados cadastrais, documentos enviados e trilha de acessos (tabela acima)
+- [x] Criptografia em repouso de CPF e documentos do beneficiário (chave `DATA_KEY`/`SESSION_SECRET`)
+- [x] Registro de acesso a dado pessoal: a equipe que abre um cadastro ou documento fica no Registro de atividades
 - [ ] Instituto designar e publicar o encarregado (DPO)
-- [ ] Incluir no inventário: CPF, dados cadastrais, holerites, informes e documentos enviados
-- [ ] Criptografia em repouso de CPF e documentos do beneficiário
-- [ ] Registro de acesso a cada dado pessoal (quem consultou o quê de quem)
-- [ ] Avaliar Relatório de Impacto (RIPD) — recomendado para dados financeiros em escala
-- [ ] Definir retenção dos documentos enviados no recadastramento
+- [ ] Avaliar Relatório de Impacto (RIPD) — recomendado para dados financeiros em escala (holerites, na 3.2)
+- [ ] Instituto definir a retenção dos documentos enviados no recadastramento
+- [ ] Incluir holerites e informes quando as APIs entrarem (3.2)
 - [ ] App: exclusão/solicitação de exclusão de conta pelo próprio usuário (exigência da Apple)
