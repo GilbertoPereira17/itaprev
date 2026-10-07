@@ -124,6 +124,9 @@ atrás de `requireUser`/`requireAdmin`.
   `/admin/auditoria` (só administradores). Não há tela para editar ou apagar registros.
 - **Recuperação de acesso** pelo servidor: `npm run admin:recuperar -- email`.
 - Todo HTML de conteúdo passa por `cleanHtml`; todo upload passa por validação de tipo real.
+- **Cabeçalhos de segurança** em `next.config.mjs` (CSP, HSTS, X-Frame-Options, nosniff, Referrer/Permissions-Policy).
+  A CSP libera só `self`, `vlibras.gov.br` e o CDN usado pelo VLibras. Testes e riscos aceitos em `SEGURANCA.md`.
+- **Disponibilidade**: `GET /api/saude` responde 200 se site e banco estão ok (503 se o banco cair).
 
 ## 4.1. Busca, SEO, acessibilidade e privacidade
 

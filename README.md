@@ -57,6 +57,8 @@ preciso instalar PostgreSQL para desenvolver.
 | `npm run db:migrate` | aplica as migrações (cria/atualiza tabelas) |
 | `npm run db:seed` | cria o usuário administrador inicial |
 | `npm run db:import-wp` | importa páginas, notícias e documentos do site WordPress atual |
+| `bash scripts/backup.sh` | backup diário (banco + arquivos, retenção de 30 dias) |
+| `bash scripts/verificar-seguranca.sh URL` | verificação de segurança (OWASP) em qualquer ambiente |
 | `npx tsc --noEmit -p .` | checagem de tipos |
 
 ## Variáveis de ambiente
@@ -79,6 +81,9 @@ Guia completo de instalação no servidor (PostgreSQL + PM2 + Nginx + HTTPS + ba
 | [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) | identidade visual, cores e tipografia |
 | [`DEPLOY.md`](DEPLOY.md) | instalação e atualização em produção |
 | [`LGPD.md`](LGPD.md) | inventário de dados pessoais (LGPD) |
+| [`SEGURANCA.md`](SEGURANCA.md) | testes de segurança (OWASP Top 10) e riscos conhecidos |
+| [`HOMOLOGACAO.md`](HOMOLOGACAO.md) | roteiro de homologação das entregas |
+| [`MANUAL-PAINEL.md`](MANUAL-PAINEL.md) | manual da equipe para usar o painel (treinamento) |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | convenções de código e regras de operação |
 
 ---

@@ -149,21 +149,42 @@ No primeiro acesso o painel pede uma senha nova. Depois, em **Minha conta**, ati
 
 ---
 
-## 9. Backup (importante)
+## 9. Backup diário (importante)
 
-Faça backup diário destes dois itens:
+O script `scripts/backup.sh` faz, a cada execução:
+
+- **banco** → `itaprev-banco-DATA.dump` (pg_dump, formato custom) e confere se o arquivo abre;
+- **arquivos enviados** (`UPLOAD_DIR`) → pasta `arquivos/DATA`, **incremental**: cada dia é uma cópia completa
+  para restaurar, mas só os arquivos novos ocupam espaço (os outros são *hard links* da cópia anterior);
+- **retenção**: apaga backups com mais de **30 dias** (`BACKUP_RETENTION_DAYS` no `.env`);
+- **cópia em outro local** se `BACKUP_COPY_DIR` estiver no `.env` (recomendado: outro disco ou servidor):
+  os dumps do banco e um espelho atualizado dos arquivos (`arquivos-atual`).
+
+Agende no `crontab -e` (todo dia às 2h):
+```
+0 2 * * * cd /var/www/itaprev && bash scripts/backup.sh >> backups/backup.log 2>&1
+```
+Teste uma vez na mão: `bash scripts/backup.sh` deve terminar com **"Backup concluído"**.
+
+| Indicador | Meta |
+|---|---|
+| **RPO** (perda máxima de dados) | 24 horas (backup diário; antes de cada atualização há um backup extra) |
+| **RTO** (tempo para voltar ao ar) | até 4 horas, seguindo o procedimento abaixo |
+
+### Restaurar um backup diário (emergência)
 
 ```bash
-# banco
-pg_dump -U itaprev itaprev | gzip > /backup/itaprev-$(date +%F).sql.gz
-# arquivos enviados
-tar czf /backup/itaprev-uploads-$(date +%F).tgz /var/www/itaprev-uploads
+cd /var/www/itaprev
+pm2 stop itaprev
+# 1. banco (troque a data pelo backup escolhido em ./backups)
+pg_restore --clean --if-exists --no-owner -d "$DATABASE_URL" backups/itaprev-banco-AAAA-MM-DD_HHMMSS.dump
+# 2. arquivos enviados (copia a pasta do dia escolhido para o UPLOAD_DIR)
+cp -a backups/arquivos/AAAA-MM-DD_HHMMSS/. /var/www/itaprev-uploads/
+pm2 start itaprev
 ```
-
-Sugestão de `crontab -e` (todo dia às 2h):
-```
-0 2 * * * pg_dump -U itaprev itaprev | gzip > /backup/itaprev-$(date +\%F).sql.gz && tar czf /backup/itaprev-uploads-$(date +\%F).tgz /var/www/itaprev-uploads
-```
+> Para conferir um backup **sem mexer no site**, restaure num banco de teste:
+> `createdb itaprev_teste && pg_restore --no-owner -d postgres://.../itaprev_teste arquivo.dump`.
+> Recomenda-se fazer esse teste uma vez por mês.
 
 ---
 
@@ -195,6 +216,42 @@ pg_restore --clean --if-exists --no-owner -d "postgres://itaprev:SENHA@localhost
   backups/itaprev-pre-atualizacao-AAAA-MM-DD_HHMMSS.dump
 git reset --hard <versão anterior>   # o script mostra qual era
 npm ci --include=dev && npm run build && pm2 start itaprev
+```
+
+---
+
+## Ambiente de homologação (testes antes da produção)
+
+Uma segunda cópia do site, com **banco e uploads próprios**, para a equipe validar cada entrega
+antes de ela ir para o site oficial. Mostra uma faixa amarela "Ambiente de homologação" e fica fora do Google.
+
+```bash
+# banco separado
+sudo -u postgres psql -c "CREATE DATABASE itaprev_homolog OWNER itaprev;"
+# segunda cópia do projeto
+cd /var/www && git clone https://github.com/GilbertoPereira17/itaprev.git itaprev-homolog
+cd itaprev-homolog && cp ../itaprev/.env .env && nano .env
+```
+No `.env` da homologação, troque:
+
+| Variável | Valor |
+|---|---|
+| `DATABASE_URL` | `postgres://itaprev:SENHA@localhost:5432/itaprev_homolog` |
+| `UPLOAD_DIR` | `/var/www/itaprev-homolog-uploads` |
+| `SITE_URL` | endereço da homologação (ex.: `https://homolog.itanhaemprev.sp.gov.br`) |
+| `HOMOLOGACAO` | `1` |
+| `SESSION_SECRET` | um **diferente** do de produção |
+
+```bash
+npm ci --include=dev && npm run db:migrate && npm run db:seed && npm run db:import-wp
+npm run build && pm2 start npm --name itaprev-homolog -- start -- -p 3001 && pm2 save
+```
+No Nginx, crie um `server` igual ao do passo 7 com `server_name` da homologação, `proxy_pass http://127.0.0.1:3001`
+e `alias /var/www/itaprev-homolog-uploads/`.
+
+**Atualizar a homologação** (sempre antes da produção):
+```bash
+cd /var/www/itaprev-homolog && APP_NAME=itaprev-homolog PORT=3001 bash scripts/atualizar.sh
 ```
 
 ---

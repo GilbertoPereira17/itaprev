@@ -9,7 +9,11 @@ const publicSans = Public_Sans({
   display: "swap",
 });
 
+/** HOMOLOGACAO=1 no .env: cópia de testes — faixa de aviso e fora do Google */
+const HOMOLOGACAO = process.env.HOMOLOGACAO === "1";
+
 export const metadata: Metadata = {
+  ...(HOMOLOGACAO && { robots: { index: false, follow: false } }),
   metadataBase: new URL(process.env.SITE_URL || "https://www.itanhaemprev.sp.gov.br"),
   title: {
     default: "Itanhaém Prev - Instituto de Previdência de Itanhaém",
@@ -39,7 +43,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" className={publicSans.variable}>
-      <body className="min-h-screen flex flex-col antialiased bg-white relative font-sans text-slate-900">{children}</body>
+      <body className="min-h-screen flex flex-col antialiased bg-white relative font-sans text-slate-900">
+        {HOMOLOGACAO && (
+          <div role="note" className="bg-amber-400 px-4 py-1.5 text-center text-sm font-bold text-slate-900">
+            Ambiente de homologação (testes) — as informações aqui não são oficiais
+          </div>
+        )}
+        {children}
+      </body>
     </html>
   );
 }

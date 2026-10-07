@@ -92,14 +92,14 @@ Revisão completa em 04/10/2026, conferida no código.
 |---|---|
 | TLS 1.2+ / HTTPS obrigatório | ✅ em produção (`www2`) |
 | Criptografia em repouso quando aplicável | 🟡 segredos 2FA criptografados · ⏳ CPF e dados financeiros da Etapa 3 |
-| Backup diário **incremental**, retenção **mínima de 30 dias**, restauração documentada (RPO/RTO) | 🟡 backup antes de cada atualização + restauração documentada · ⏳ rotina diária com retenção de 30 dias e RPO/RTO escritos |
-| LGPD: mapeamento de dados, base legal, atendimento ao titular | 🟡 inventário (`LGPD.md`), Política de Privacidade, canal do titular na Ouvidoria, aviso no chat · ⏳ Instituto designar o encarregado (DPO) e validar com o jurídico |
-| Testes funcionais e de segurança (OWASP Top 10) | 🟡 testes funcionais automatizados no navegador (fora do repositório) · ✅ 0 vulnerabilidades em dependências de produção · ⏳ varredura OWASP (ZAP) e relatório |
-| Ambiente de homologação separado | ⏳ (ex.: `homolog.itanhaemprev...` no mesmo servidor, outro banco) |
-| Homologação formal com relatório | ⏳ |
-| Treinamento | ⏳ (manual do painel + vídeo curto) |
+| Backup diário **incremental**, retenção **mínima de 30 dias**, restauração documentada (RPO/RTO) | ✅ `scripts/backup.sh` (banco diário verificado + arquivos incrementais, 30 dias, cópia externa opcional), RPO 24h / RTO 4h, restauração testada (`DEPLOY.md`) · ⏳ TI agendar no cron do servidor |
+| LGPD: mapeamento de dados, base legal, atendimento ao titular | ✅ inventário (`LGPD.md`), Política de Privacidade, canal do titular na Ouvidoria, aviso e registro mascarado no chat · ⏳ Instituto designar o encarregado (DPO) e validar com o jurídico |
+| Testes funcionais e de segurança (OWASP Top 10) | ✅ relatório `SEGURANCA.md` (A01–A10), `scripts/verificar-seguranca.sh` repetível, cabeçalhos de segurança (CSP, HSTS…), 0 vulnerabilidades em dependências de produção |
+| Ambiente de homologação separado | ✅ procedimento em `DEPLOY.md` (`HOMOLOGACAO=1`: faixa de aviso e fora do Google) · ⏳ TI criar a cópia no servidor |
+| Homologação formal com relatório | ✅ roteiro `HOMOLOGACAO.md` (22 verificações + parecer) · ⏳ execução com o Instituto |
+| Treinamento | ✅ `MANUAL-PAINEL.md` · ⏳ sessão com a equipe |
 | Implantação com plano de rollback | ✅ `scripts/atualizar.sh` + `DEPLOY.md` |
-| Logs estruturados e monitoramento de disponibilidade | 🟡 logs do PM2 · ⏳ monitor de disponibilidade (pode ser um fluxo n8n que testa o site a cada 5 min e avisa) |
+| Logs estruturados e monitoramento de disponibilidade | 🟡 logs do PM2 + `/api/saude` (site e banco) · ⏳ monitor que consulta `/api/saude` a cada 5 min e avisa |
 
 ---
 
@@ -144,7 +144,7 @@ está espalhado (GCASP, ProtecWeb, Portal do Segurado, site do instituto).
 1. ~~Política de Privacidade + LGPD básica~~ ✅
 2. ~~Busca geral do site e busca de notícias~~ ✅
 3. ~~SEO técnico + VLibras + atalhos eMAG + ícone/manifesto~~ ✅
-4. Backup diário com retenção de 30 dias + RPO/RTO documentados + monitor de disponibilidade.
+4. ~~Backup diário com retenção de 30 dias + RPO/RTO documentados~~ ✅ · monitor de disponibilidade (falta o aviso).
 5. ~~Versionamento de documentos, permissões por módulo e triagem no painel~~ ✅
 6. ~~Chatbot: base de conhecimento no painel, registro das conversas e acompanhamento de protocolo~~ ✅
 
