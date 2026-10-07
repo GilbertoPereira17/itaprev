@@ -94,6 +94,12 @@ export default async function AdminMensagem(
               ))}
             </Select>
           </Field>
+          <Field
+            label="Resposta ao cidadão"
+            hint={`Aparece para quem enviou ao consultar o protocolo em /acompanhar (com o código ${m.accessCode || "—"}, e-mail ou telefone).`}
+          >
+            <Textarea name="publicReply" rows={4} defaultValue={m.publicReply} placeholder="Ex.: Sua solicitação foi atendida. O documento está disponível no Portal do Segurado." />
+          </Field>
           <Field label="Anotação interna (não aparece para quem enviou)">
             <Textarea name="internalNote" rows={4} defaultValue={m.internalNote} placeholder="Ex.: respondido por telefone em 30/09 pela equipe de benefícios." />
           </Field>

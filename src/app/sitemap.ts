@@ -8,7 +8,7 @@ const BASE = (process.env.SITE_URL || "https://www.itanhaemprev.sp.gov.br").repl
 
 /** sitemap.xml gerado a partir do banco: sempre reflete o que está publicado */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const fixed = ["", "/institucional", "/segurados", "/conselhos", "/transparencia", "/noticias", "/contato", "/ouvidoria", "/privacidade"];
+  const fixed = ["", "/institucional", "/segurados", "/conselhos", "/transparencia", "/noticias", "/contato", "/ouvidoria", "/acompanhar", "/privacidade"];
   const [news, pages, sections] = await Promise.all([
     db.select({ slug: schema.news.slug, at: schema.news.updatedAt }).from(schema.news).where(eq(schema.news.published, true)),
     db.select({ slug: schema.pages.slug, at: schema.pages.updatedAt }).from(schema.pages).where(eq(schema.pages.published, true)),

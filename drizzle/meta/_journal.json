@@ -29,6 +29,13 @@
       "when": 1791381833213,
       "tag": "0003_permissoes_versoes_triagem",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791382843309,
+      "tag": "0004_assistente_protocolo",
+      "breakpoints": true
     }
   ]
 }

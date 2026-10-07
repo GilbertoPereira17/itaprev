@@ -73,7 +73,9 @@ src/
 | `pages` | páginas institucionais dinâmicas (servidas em `/(site)/[slug]`) |
 | `docSections`, `docGroups`, `documents` | biblioteca de documentos públicos (transparência) |
 | `documentVersions` | versões anteriores de cada documento (guardadas ao trocar o arquivo) |
-| `messages` | contato e ouvidoria, com status, anotação interna e responsável (triagem) |
+| `messages` | contato e ouvidoria, com status, anotação interna, responsável (triagem), resposta ao cidadão e código de acesso |
+| `chatbotKnowledge` | base de conhecimento da assistente "Ita" (editada no painel) |
+| `chatLogs` | registro das conversas do chat (dados pessoais ocultados; apagado após 180 dias) |
 
 Migrações geradas por `drizzle-kit` (`npm run db:generate`) em `./drizzle`, aplicadas por
 `npm run db:migrate`. Carga inicial: `npm run db:seed` (idempotente: só preenche tabelas vazias).
@@ -151,7 +153,18 @@ chatbot "Ita" já direciona o segurado para o sistema correto de cada serviço.
 
 ## 6. Chatbot ("Ita")
 
-`ChatWidget` (cliente) envia `{ message, sessionId }` para o webhook n8n definido em
-`NEXT_PUBLIC_CHATBOT_WEBHOOK` e exibe o campo `reply` da resposta. O fluxo n8n
-("ITAPREV - Chatbot Segurado") usa IA (OpenAI) com prompt restrito aos serviços do instituto,
-e cai para o WhatsApp/telefone quando não sabe responder.
+`ChatWidget` (cliente) envia `{ message, sessionId }` para a rota **`/api/chat`** do próprio site, que:
+
+1. limita abuso por IP (em memória);
+2. se a mensagem tiver um nº de protocolo, responde direto com o link de `/acompanhar` (sem IA);
+3. monta a base de conhecimento (`src/lib/chatbot.ts`: Contatos e links + Assistente virtual + Perguntas frequentes)
+   e chama o webhook n8n (`CHATBOT_WEBHOOK`) com `{ message, sessionId, knowledge }`;
+4. grava pergunta e resposta em `chat_logs` (CPF/e-mail/telefone da pergunta ocultados).
+
+O fluxo n8n ("ITAPREV - Chatbot Segurado") usa IA (OpenAI) com prompt restrito aos serviços do instituto,
+trata `knowledge` como fonte principal e cai para o WhatsApp/telefone quando não sabe responder.
+O endereço do n8n fica só no servidor.
+
+**Acompanhamento de protocolo:** `/acompanhar` (`trackProtocol` em `src/lib/message-actions.ts`) exige o nº
+do protocolo + código de acesso, e-mail ou telefone informado no envio; mostra situação e a "Resposta ao cidadão"
+registrada no painel.

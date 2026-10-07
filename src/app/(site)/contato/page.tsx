@@ -111,7 +111,11 @@ export default function ContatoPage() {
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">Envie sua mensagem</h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  Preencha os campos abaixo para enviar sua solicitação à nossa equipe.
+                  Preencha os campos abaixo para enviar sua solicitação à nossa equipe. Já enviou?{" "}
+                  <Link href="/acompanhar" className="font-semibold text-[var(--color-brand-blue)] hover:underline">
+                    Acompanhe pelo protocolo
+                  </Link>
+                  .
                 </p>
               </div>
 

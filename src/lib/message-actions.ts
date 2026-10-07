@@ -1,11 +1,18 @@
 "use server";
 
+import crypto from "node:crypto";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { CONTACT_SUBJECTS, OMBUDSMAN_TYPES } from "@/lib/messages";
+import { CONTACT_SUBJECTS, MESSAGE_STATUS, OMBUDSMAN_TYPES } from "@/lib/messages";
 
-export type MessageState = { ok: boolean; protocol?: string; error?: string };
+export type MessageState = { ok: boolean; protocol?: string; code?: string; error?: string };
+
+/** Código curto para consultar o protocolo (sem letras/números que se confundem) */
+function newAccessCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  return Array.from(crypto.randomBytes(6), (b) => chars[b % chars.length]).join("");
+}
 
 // Limite simples por IP: evita que robôs encham o banco (5 envios a cada 10 minutos)
 const WINDOW_MS = 10 * 60 * 1000;
@@ -24,7 +31,7 @@ const field = (fd: FormData, key: string, max = 200) => String(fd.get(key) ?? ""
 
 export async function sendMessage(_prev: MessageState, fd: FormData): Promise<MessageState> {
   // Campo invisível: pessoas não preenchem, robôs sim. Finge sucesso sem gravar.
-  if (field(fd, "website")) return { ok: true, protocol: "—" };
+  if (field(fd, "website")) return { ok: true, protocol: "—", code: "—" };
 
   const ip = ((await headers()).get("x-forwarded-for") ?? "").split(",")[0].trim() || "local";
   if (rateLimited(ip)) {
@@ -54,10 +61,53 @@ export async function sendMessage(_prev: MessageState, fd: FormData): Promise<Me
 
   const [row] = await db
     .insert(schema.messages)
-    .values({ kind, category, name, document, email, phone, body, anonymous })
-    .returning({ id: schema.messages.id });
+    .values({ kind, category, name, document, email, phone, body, anonymous, accessCode: newAccessCode() })
+    .returning({ id: schema.messages.id, accessCode: schema.messages.accessCode });
   const protocol = `${new Date().getFullYear()}-${String(row.id).padStart(6, "0")}`;
   await db.update(schema.messages).set({ protocol }).where(eq(schema.messages.id, row.id));
 
-  return { ok: true, protocol };
+  return { ok: true, protocol, code: row.accessCode };
+}
+
+// ---------- Acompanhamento do protocolo ----------
+export type TrackState = {
+  ok: boolean;
+  error?: string;
+  result?: { protocol: string; kind: string; category: string; status: string; createdAt: string; updatedAt: string; reply: string };
+};
+
+const digits = (v: string) => v.replace(/\D/g, "");
+
+/** Consulta pelo nº do protocolo + código de acesso, e-mail ou telefone informado no envio */
+export async function trackProtocol(_prev: TrackState, fd: FormData): Promise<TrackState> {
+  const ip = ((await headers()).get("x-forwarded-for") ?? "").split(",")[0].trim() || "local";
+  if (rateLimited("track:" + ip)) return { ok: false, error: "Muitas consultas em sequência. Aguarde alguns minutos." };
+
+  const protocol = field(fd, "protocol", 20).replace(/\s/g, "");
+  const check = field(fd, "check", 120);
+  const notFound = { ok: false, error: "Não encontramos um protocolo com esses dados. Confira o número e o código, e-mail ou telefone." };
+  if (!/^\d{4}-\d{6}$/.test(protocol) || !check) return notFound;
+
+  const [m] = await db.select().from(schema.messages).where(eq(schema.messages.protocol, protocol));
+  if (!m) return notFound;
+  const c = check.toLowerCase();
+  const matches =
+    (m.accessCode && c.toUpperCase() === m.accessCode) ||
+    (m.email && c === m.email.toLowerCase()) ||
+    (m.phone && digits(c).length >= 8 && digits(m.phone).endsWith(digits(c)));
+  if (!matches) return notFound;
+
+  const fmt = (d: Date) => new Date(d).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+  return {
+    ok: true,
+    result: {
+      protocol: m.protocol,
+      kind: m.kind === "ouvidoria" ? "Ouvidoria" : "Fale conosco",
+      category: m.category,
+      status: MESSAGE_STATUS[m.status === "arquivada" ? "respondida" : m.status] ?? m.status,
+      createdAt: fmt(m.createdAt),
+      updatedAt: fmt(m.updatedAt),
+      reply: m.publicReply,
+    },
+  };
 }

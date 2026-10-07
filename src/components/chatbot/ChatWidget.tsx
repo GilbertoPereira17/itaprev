@@ -5,9 +5,9 @@ import Image from "next/image";
 import { X, Send, User, ExternalLink, FileText, DollarSign, UserCheck, MapPin, Landmark, ShieldCheck, RotateCcw } from "lucide-react";
 import { INSTITUTION_INFO } from "@/data/institution";
 
-// Endpoint do chatbot com IA (fluxo n8n "ITAPREV - Chatbot Segurado")
-const CHATBOT_WEBHOOK =
-  process.env.NEXT_PUBLIC_CHATBOT_WEBHOOK || "https://n8n.triusbot.site/webhook/itaprev-chat";
+// O site fala com a própria rota /api/chat, que consulta a IA com a base de conhecimento
+// do painel e registra a conversa (o endereço da IA fica só no servidor)
+const CHAT_ENDPOINT = "/api/chat";
 
 // Nome da assistente virtual (persona)
 const ASSISTANT_NAME = "Ita";
@@ -167,14 +167,15 @@ export function ChatWidget() {
     };
 
     try {
-      const res = await fetch(CHATBOT_WEBHOOK, {
+      const res = await fetch(CHAT_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userText, sessionId }),
       });
-      if (!res.ok) throw new Error("resposta inválida");
+      if (!res.ok && res.status !== 429) throw new Error("resposta inválida");
       const data = await res.json();
       const reply: string = (data?.reply || data?.output || "").toString().trim();
+      const action = data?.action?.url ? { label: String(data.action.label), url: String(data.action.url), isExternal: false } : undefined;
 
       const botMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -182,7 +183,7 @@ export function ChatWidget() {
         text:
           reply ||
           "Não consegui responder agora. Você pode falar direto com o nosso atendimento.",
-        actionButton: reply ? undefined : whatsappAction,
+        actionButton: reply ? action : whatsappAction,
       };
       setMessages((prev) => [...prev, botMsg]);
     } catch {

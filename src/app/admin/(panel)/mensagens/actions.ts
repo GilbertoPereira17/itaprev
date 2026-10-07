@@ -25,6 +25,7 @@ export async function updateMessage(fd: FormData) {
     .set({
       status: status in MESSAGE_STATUS ? status : "nova",
       internalNote: str(fd, "internalNote").slice(0, 5000),
+      publicReply: str(fd, "publicReply").slice(0, 5000),
       assignedTo: assignee ? assignedTo : null,
       updatedAt: new Date(),
     })

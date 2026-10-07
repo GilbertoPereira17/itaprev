@@ -1,4 +1,5 @@
-import { ShieldCheck, Mail, Clock } from "lucide-react";
+import Link from "next/link";
+import { ShieldCheck, Mail, Clock, Search } from "lucide-react";
 import { PageHero } from "@/components/layout/PageHero";
 import { MessageForm } from "@/components/content/MessageForm";
 import { getSettings } from "@/lib/content";
@@ -43,6 +44,16 @@ export default async function OuvidoriaPage() {
                   <a href={`mailto:${info.contacts.ouvidoriaEmail}`} className="font-semibold text-[var(--color-brand-blue)] hover:underline">
                     {info.contacts.ouvidoriaEmail}
                   </a>
+                  .
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <Search className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-brand-blue)]" aria-hidden />
+                <p>
+                  Já tem um protocolo?{" "}
+                  <Link href="/acompanhar" className="font-semibold text-[var(--color-brand-blue)] hover:underline">
+                    Acompanhe o andamento
+                  </Link>
                   .
                 </p>
               </div>

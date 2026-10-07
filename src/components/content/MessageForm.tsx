@@ -38,9 +38,19 @@ export function MessageForm({ kind }: { kind: "contato" | "ouvidoria" }) {
         <p className="text-slate-700">
           Número de protocolo: <strong className="text-xl text-slate-900">{state.protocol}</strong>
         </p>
-        <p className="text-sm text-slate-600">
-          Guarde este número. {isOmbudsman ? "Ele identifica sua manifestação na Ouvidoria." : "Nossa equipe responderá pelo contato informado."}
+        <p className="text-slate-700">
+          Código de acesso: <strong className="font-mono text-xl tracking-widest text-slate-900">{state.code}</strong>
         </p>
+        <p className="text-sm text-slate-600">
+          Guarde os dois. {isOmbudsman ? "Eles identificam sua manifestação na Ouvidoria." : "Nossa equipe responderá pelo contato informado."}{" "}
+          Você pode acompanhar o andamento a qualquer momento.
+        </p>
+        <Link
+          href={`/acompanhar?protocolo=${state.protocol}`}
+          className="inline-block rounded-xl bg-[var(--color-brand-blue)] px-5 py-3 font-bold text-white hover:bg-[var(--color-brand-navy)]"
+        >
+          Acompanhar protocolo
+        </Link>
       </div>
     );
   }

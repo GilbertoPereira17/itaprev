@@ -6,6 +6,7 @@ export const MODULES = {
   slides: "Banner da página inicial",
   faq: "Perguntas frequentes",
   mensagens: "Mensagens e Ouvidoria",
+  chatbot: "Assistente virtual (Ita)",
   configuracoes: "Contatos e links",
 } as const;
 

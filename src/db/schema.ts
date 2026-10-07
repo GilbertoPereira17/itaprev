@@ -153,10 +153,32 @@ export const messages = pgTable("messages", {
   anonymous: boolean("anonymous").notNull().default(false),
   status: text("status").notNull().default("nova"), // nova | em_andamento | respondida | arquivada
   internalNote: text("internal_note").notNull().default(""),
+  publicReply: text("public_reply").notNull().default(""), // resposta exibida na consulta do protocolo
+  accessCode: text("access_code").notNull().default(""), // código para consultar o protocolo (útil no anonimato)
   // Triagem: quem da equipe está cuidando (sem FK: o histórico permanece se o usuário mudar)
   assignedTo: integer("assigned_to"),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
+});
+
+/** Base de conhecimento da assistente virtual (Ita), editada pela equipe */
+export const chatbotKnowledge = pgTable("chatbot_knowledge", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  active: boolean("active").notNull().default(true),
+  updatedAt: updatedAt(),
+});
+
+/** Registro das conversas com a assistente (CPF mascarado; sem IP) */
+export const chatLogs = pgTable("chat_logs", {
+  id: serial("id").primaryKey(),
+  sessionId: text("session_id").notNull().default(""),
+  question: text("question").notNull(),
+  answer: text("answer").notNull().default(""),
+  answered: boolean("answered").notNull().default(true), // false = a assistente não conseguiu responder
+  createdAt: createdAt(),
 });
 
 /** Registro de auditoria: quem fez o quê no painel e quando (somente inclusão, nunca editado) */
@@ -180,4 +202,6 @@ export type DocGroup = typeof docGroups.$inferSelect;
 export type DocumentRow = typeof documents.$inferSelect;
 export type DocumentVersion = typeof documentVersions.$inferSelect;
 export type Message = typeof messages.$inferSelect;
+export type ChatbotKnowledge = typeof chatbotKnowledge.$inferSelect;
+export type ChatLog = typeof chatLogs.$inferSelect;
 export type AuditEntry = typeof auditLog.$inferSelect;

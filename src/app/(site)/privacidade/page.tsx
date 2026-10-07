@@ -76,7 +76,8 @@ export default async function PrivacidadePage() {
               <strong>Assistente virtual (Ita):</strong> o texto que você digita na conversa. Ele é processado por um
               serviço de inteligência artificial de terceiro para gerar a resposta e pode ser processado fora do
               Brasil. <strong>Não informe CPF, senhas ou outros dados pessoais no chat.</strong> Para tratar de assuntos
-              individuais, use os canais de atendimento.
+              individuais, use os canais de atendimento. As perguntas e respostas ficam registradas por 180 dias para
+              auditoria e melhoria do atendimento, com CPF, e-mail e telefone ocultados.
             </li>
           </ul>
         </Section>

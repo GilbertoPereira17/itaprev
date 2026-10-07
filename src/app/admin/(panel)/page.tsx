@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { count, eq } from "drizzle-orm";
-import { Newspaper, FolderOpen, FileText, Images, HelpCircle, Settings, Inbox, ShieldAlert } from "lucide-react";
+import { Bot, Newspaper, FolderOpen, FileText, Images, HelpCircle, Settings, Inbox, ShieldAlert } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUser } from "@/lib/auth";
 import { canAccess, type ModuleKey } from "@/lib/permissions";
@@ -26,6 +26,7 @@ export default async function Dashboard(props: { searchParams: Promise<{ ok?: st
       icon: Inbox,
       module: "mensagens",
     },
+    { href: "/admin/assistente", label: "Assistente virtual", desc: "O que a Ita sabe e o que perguntam", icon: Bot, module: "chatbot" },
     { href: "/admin/noticias/novo", label: "Publicar notícia", desc: `${news.n} publicadas`, icon: Newspaper, module: "noticias" },
     { href: "/admin/documentos", label: "Documentos", desc: `${docs.n} arquivos em ${sections.n} seções`, icon: FolderOpen, module: "documentos" },
     { href: "/admin/paginas", label: "Páginas de texto", desc: `${pages.n} páginas (Aposentados, Pensionistas…)`, icon: FileText, module: "paginas" },

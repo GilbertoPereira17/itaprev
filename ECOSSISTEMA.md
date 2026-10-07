@@ -80,12 +80,12 @@ Revisão completa em 04/10/2026, conferida no código.
 | Requisito | Status |
 |---|---|
 | Atendimento inicial com IA, integrado ao site | ✅ "Ita" (n8n + OpenAI) |
-| **Base de conhecimento configurável** | 🟡 hoje no prompt do n8n · ⏳ usar as **Perguntas frequentes do painel** como base (equipe edita sem a Trius) |
+| **Base de conhecimento configurável** | ✅ Painel → Assistente virtual (+ Perguntas frequentes e Contatos e links), enviada à IA a cada pergunta |
 | Respostas automáticas para dúvidas frequentes | ✅ |
 | Direcionamento para atendimento humano | ✅ WhatsApp/telefone |
-| Registro completo das solicitações para auditoria | ⏳ conversas ficam só no n8n — gravar no banco e mostrar no painel |
-| Mensagens automáticas de confirmação/acompanhamento | 🟡 protocolo na tela · ⏳ e-mail de confirmação (precisa do **SMTP da prefeitura**) |
-| Apoio aos serviços da Área do Beneficiário | ⏳ (depende da Etapa 3) |
+| Registro completo das solicitações para auditoria | ✅ conversas gravadas no banco (dados pessoais ocultados, 180 dias) e exibidas no painel, com filtro "sem resposta" |
+| Mensagens automáticas de confirmação/acompanhamento | ✅ protocolo + código de acesso na tela, consulta em /acompanhar com resposta da equipe, chat reconhece nº de protocolo · ⏳ e-mail (precisa do **SMTP da prefeitura**) |
+| Apoio aos serviços da Área do Beneficiário | 🟡 direciona para holerite, informe e recadastramento · ⏳ atalhos para a Área do Beneficiário quando a 3.1 entrar |
 
 ### Etapa 6 — Segurança, LGPD, Testes e Implantação
 | Requisito | Status |
@@ -146,7 +146,7 @@ está espalhado (GCASP, ProtecWeb, Portal do Segurado, site do instituto).
 3. ~~SEO técnico + VLibras + atalhos eMAG + ícone/manifesto~~ ✅
 4. Backup diário com retenção de 30 dias + RPO/RTO documentados + monitor de disponibilidade.
 5. ~~Versionamento de documentos, permissões por módulo e triagem no painel~~ ✅
-6. Chatbot: base de conhecimento a partir do FAQ do painel + registro das conversas no painel.
+6. ~~Chatbot: base de conhecimento no painel, registro das conversas e acompanhamento de protocolo~~ ✅
 
 **Quando as APIs chegarem:** Área do Beneficiário (cadastro, login, Meus serviços) → integrações GCASP/ProtecWeb → requerimentos.
 
